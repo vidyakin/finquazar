@@ -7,7 +7,10 @@
   "author": "Sergey Vidyakin <vidyakin.sergey@gmail.com>",
   "private": true,
   "scripts": {
-    "test": "echo \"No test specified\" && exit 0"
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "quasar dev -m electron -t mat",
+    "build": "quasar build -m electron -t mat",
+    "build-win": "quasar build -m electron win32 -t mat builder"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
