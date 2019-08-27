@@ -43,7 +43,8 @@ module.exports = function (ctx) {
         'QList',
         'QItem',
         'QItemSection',
-        'QItemLabel'
+        'QItemLabel',
+        'QSelect'
       ],
 
       directives: [
@@ -71,7 +72,7 @@ module.exports = function (ctx) {
 
     devServer: {
       // https: true,
-      // port: 8080,
+      port: 8080,
       open: true // opens browser window automatically
     },
 
@@ -134,6 +135,7 @@ module.exports = function (ctx) {
       extendWebpack (cfg) {
         // do something with Electron main process Webpack cfg
         // chainWebpack also available besides this extendWebpack
+        cfg.devtool = 'source-map'
       },
 
       packager: {
