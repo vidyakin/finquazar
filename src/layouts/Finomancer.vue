@@ -99,7 +99,7 @@ export default {
         if (fn === undefined) return;
         this.filename = fn[0];
 
-        Excel.read(fn[0])
+        //let data = Excel.read(fn[0])
         
       });
     },
