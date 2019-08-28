@@ -14,16 +14,17 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
+    "exceljs": "^1.15.0",
     "quasar": "^1.0.0"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",
+    "@types/exceljs": "^0.5.3",
     "devtron": "^1.4.0",
     "electron": "^4.0.5",
     "electron-debug": "^2.1.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-packager": "^13.1.1",
-    "exceljs": "^1.15.0",
     "strip-ansi": "^3.0.1"
   },
   "engines": {

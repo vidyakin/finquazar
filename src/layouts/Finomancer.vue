@@ -5,7 +5,7 @@
     </div>
     <div class="row">
       <div class="col filestring">
-        Файл ведомости:
+        Файл с данными:
         <span class="filename">{{filename}}</span>
       </div>
     </div>
@@ -15,10 +15,20 @@
         <q-btn
           color="secondary"
           icon="attach_file"
-          @click="chooseFile()"
-          label="Загрузить ведомость"
+          v-on:click="chooseFile"
+          label="Загрузить файл"
         />
         
+      </div>
+
+      <div class="col1">
+        <q-select 
+          label="Периоды" stack-label filled v-model="currPeriod" :options="periods"
+          option-value="p_id" option-label="p_name"
+          map-options options-cover 
+          :dense="densed" :options-dense="densed"
+          style="min-width: 150px"
+        />
       </div>
 
       <div class="col1">
@@ -72,6 +82,7 @@ const fs = require("fs");
 const { dialog } = require("electron").remote;
 
 const Excel = require('./../excel')
+// import {readData} from './../excel'
 
 export default {
   components: { AccTable },
@@ -86,22 +97,29 @@ export default {
       ],
       currForm: "osv_acc",
       currAcc: "01",
-      accs: ["000", "01", "02", "08"]
+      currPeriod: '',
+      accs: ["000", "01", "02", "08"],
+      periods: []
     };
   },
   methods: {
-    chooseFile() {
+    chooseFile: function(event) {
       let opt = {
         title: "Выберите файл Excel",
         filters: [{ name: "Excel файлы", extensions: ["xls", "xlsx"] }]
       };
-      dialog.showOpenDialog(null, opt, fn => {
-        if (fn === undefined) return;
-        this.filename = fn[0];
+      const fn = dialog.showOpenDialog(null, opt) //null, opt, fn => {
+      if (fn === undefined) return;
+      this.filename = fn[0];
 
-        //let data = Excel.read(fn[0])
+      let V = this
+      Excel.readData(this.filename).then((periods, data)=>{
+          V.periods = periods
+          // for rows in data ...
+        })
+      console.log(this.periods);
         
-      });
+      // });
     },
     formChange(value) {
       console.log("form was changed " + value);
