@@ -5,7 +5,7 @@
         <th rowspan="2" style="width: 70px;">Счет</th>
         <th rowspan="2" style="width: 300px;">Наименование</th>
         <th colspan="2">Начальное сальдо</th>
-        <th colspan="2">Обороты</th>
+        <th colspan="2">Обороты</th> <!-- столько раз сколько периодов * 2 -->
         <th colspan="2">Конечное сальдо</th>
       </tr>
       <tr>

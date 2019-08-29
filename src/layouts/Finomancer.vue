@@ -70,7 +70,7 @@
       </div>
     </div>
     <div class="row">
-      <AccTable></AccTable>
+      <AccTable :data="data"></AccTable>
     </div>
   </div>
 </template>
@@ -113,12 +113,15 @@ export default {
       this.filename = fn[0];
 
       let V = this
-      Excel.readData(this.filename).then((periods, data)=>{
-          V.periods = periods
-          // for rows in data ...
-        })
-      console.log(this.periods);
-        
+      let PD = Excel.readData(this.filename)//.then((periods, data)=>{
+        //   V.periods = periods
+        //   // for rows in data ...
+        // })
+      PD.periods.map(p => this.periods.push(p.period))
+      this.currPeriod = this.periods[0].p_id
+      this.data = PD.data
+
+      console.log(this.periods);        
       // });
     },
     formChange(value) {
