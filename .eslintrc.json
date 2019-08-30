@@ -24,5 +24,8 @@
             "error",
             "never"
         ]
-    }
+    },
+    "plugins": [
+        "vue"
+    ]
 }

@@ -86,9 +86,29 @@ let tblDemo = [
   },
 ]
 
+let tblDemoReal = [
+    {
+        lType: 0,
+        acc: "000",
+        accName: "Ввод начальных остатков",
+        saldoStartDt: 0,
+        saldoStartKt: 0,
+        periodicAmounts: [{
+          Dt: 0,
+          Kt: 0,
+          SaldoDt: 0,
+          SaldoKt: 0
+        }],
+        totalDtAmounts: 0,
+        totalKtAmounts: 0,
+        totalDtSaldo: 0,
+        totalKtSaldo: 0
+      }
+]
+
 export default {
     props: {
-      tdata: Array
+      tdata
     },
     data () {
         return {
