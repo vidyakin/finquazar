@@ -1,5 +1,5 @@
 <template>
-  <table class="tbl">
+  <table class="tbl" v-show="tableData.length > 0">
     <thead>
       <tr>
         <th rowspan="2" style="width: 70px;">Счет</th>
@@ -18,16 +18,16 @@
       </tr>
     </thead>
     <tbody>
-      <template v-for="tRow in this.tbl" >
+      <template v-for="tRow in this.tableData" >
         <tr :class="{base: tRow.acc.indexOf('.') == -1 }" :key="tRow.acc">
-          <td >{{tRow.acc}}</td>
-          <td>{{tRow.name}}</td>
-          <td>{{tRow.DtBegin}}</td>
-          <td>{{tRow.KtBegin}}</td>
-          <td>{{tRow.DtOb}}</td>
-          <td>{{tRow.KtOb}}</td>
-          <td>{{tRow.DtEnd}}</td>
-          <td>{{tRow.KtEnd}}</td>
+          <td >{{tRow.acc }}</td>
+          <td>{{tRow.accName}}</td>
+          <td>{{tRow.НачОстатокДт | fin_format }}</td>
+          <td>{{tRow.НачОстатокКт | fin_format }}</td>
+          <td>{{tRow.ОборотыДт | fin_format }}</td>
+          <td>{{tRow.ОборотыКт | fin_format }}</td>
+          <td>{{tRow.КонОстатокДт | fin_format }}</td>
+          <td>{{tRow.КонОстатокКт | fin_format }}</td>
         </tr>
       </template>
       
@@ -40,76 +40,55 @@
 let tblDemo = [
   {
     acc:'000',
-    name: 'Ввод начальных остатков',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    acc_name: 'Ввод начальных остатков',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },
   {
     acc:'01',
-    name: 'Основные средства',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    acc_name: 'Основные средства',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },
   {
     acc:'01.01',
-    name: 'Основные средства в организации',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    accName: 'Основные средства в организации',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },
   {
     acc:'01.03',
-    name: 'Арендованное имущество',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    accName: 'Арендованное имущество',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },{
     acc:'02',
-    name: 'Амортизация основных средств',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    accName: 'Амортизация основных средств',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },{
     acc:'02.01',
-    name: 'Амортизация ОС, учитываемых на счете 01',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    accName: 'Амортизация ОС, учитываемых на счете 01',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },{
     acc:'02.03',
-    name: 'Амортизация арендованного имущества',
-    DtBegin: 0.0, KtBegin: 0.0,
-    DtOb: 0.0,    KtOb: 0.0,
-    DtEnd: 0.0,   KtEnd: 0.0
+    accName: 'Амортизация арендованного имущества',
+    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
+    ОборотыДт: 0.0,    ОборотыКт: 0.0,
+    КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },
 ]
 
-let tblDemoReal = [
-    {
-        lType: 0,
-        acc: "000",
-        accName: "Ввод начальных остатков",
-        saldoStartDt: 0,
-        saldoStartKt: 0,
-        periodicAmounts: [{
-          Dt: 0,
-          Kt: 0,
-          SaldoDt: 0,
-          SaldoKt: 0
-        }],
-        totalDtAmounts: 0,
-        totalKtAmounts: 0,
-        totalDtSaldo: 0,
-        totalKtSaldo: 0
-      }
-]
 
 export default {
-    props: {
-      tdata
-    },
+    props: ['tableData'],      
     data () {
         return {
           tbl: tblDemo
@@ -120,6 +99,9 @@ export default {
         console.log('Счет '+ф)
         ф.indexOf('.') != -1
       }
+    },
+    filters: {
+      fin_format: value => value.toLocaleString('ru', {style:'decimal', minimumFractionDigits: 2})
     }
 }
 </script>
@@ -130,7 +112,8 @@ export default {
   table-layout: fixed;
   border-collapse: collapse;
   border: 1px solid grey;
-  margin-top: 10px;
+  font-size: 10pt;
+  /* margin-top: 10px; */
 }
 .tbl thead {
   background-color: beige;

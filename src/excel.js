@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 const XLSX = require("xlsx")
+const ExcelJS = require("exceljs/modern.nodejs")
 
 export function readData (path) {
 
@@ -8,7 +9,10 @@ export function readData (path) {
 	const sh = wb.Sheets[wb.SheetNames[0]]
 
 	const diap = XLSX.utils.decode_range(sh["!ref"]) // 'A1:AI192 => {s: {c:0, r:0}, e: {c:34, r:192}}'
-	const getVal = (c, r) => sh[XLSX.utils.encode_cell({c, r})].v || 0 // упрощающая функция
+	const getVal = (c, r) => {
+		let cell = sh[XLSX.utils.encode_cell({c, r})]
+		return cell === undefined ? 0.0 : cell.v || 0.0 // упрощающая функция
+	}
 
 	let data = [], periods = []
 
@@ -51,10 +55,11 @@ export function readData (path) {
 		}
 		periods.forEach( p => {
 			let pAmount = {
-				Dt: getVal(p.col, row),
-				Kt: getVal(p.col+1, row),
-				SaldoDt: getVal(p.col+2, row),
-				SaldoKt: getVal(p.col+3, row)
+				p_id: p.period.p_id,
+				Dt: getVal(p.col+1, row), // pCol - колонка где номер периода. Дебет - после нее
+				Kt: getVal(p.col+2, row),
+				SaldoDt: getVal(p.col+3, row),
+				SaldoKt: getVal(p.col+4, row)
 			}
 			line.periodicAmounts.push(pAmount)
 		})
@@ -63,6 +68,38 @@ export function readData (path) {
 	}
 
 	return {periods, data}    
+}
+
+export function saveData(data, path, done_func) {
+	// Вариант без форматирования
+	// const wb = XLSX.utils.book_new(); // Новая книга
+	// const ws = XLSX.utils.json_to_sheet(data, {
+	// 	header: ["Счет","Наименование", "Нач. сальдо ДТ", "Нач. сальдо Кт", "Обороты Дт", "Обороты Кт", "Кон. сальдо Дт", "Кон. сальдо Кт"]
+	// });
+	// XLSX.utils.book_append_sheet(wb, ws, "Данные по ОСВ");
+	// XLSX.writeFile(wb, path);
+	
+	// 2 способ - с другой библиотекой
+	const wb = new ExcelJS.Workbook()
+	wb.creator = "Finomancer Lab"
+	const sh = wb.addWorksheet("Данные по ОСВ")
+	sh.colums = [
+		{width: 10},
+		{width: 30},
+		{width: 40},
+		{width: 40},
+		{width: 40},
+		{width: 40},
+		{width: 40},
+		{width: 40},
+	]
+
+	sh.addRow(["Отчет по ОСВ за 1 полугодие 2019 года"])
+	sh.addRow(['000','Счет начального заполнения',0,10, 0,0, 0,10])
+	sh.getRow(0).font = {name: "Arial", family: 1, size: 16}
+	wb.xlsx.writeFile(path).then( result => {
+		return done_func(result)
+	})
 }
 
 export function readData_old(path) {
