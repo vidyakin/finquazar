@@ -45,13 +45,13 @@ export function readData (path) {
 			lType: getVal(0, row),
 			acc: getVal(1, row),
 			accName: getVal(2, row),
-			saldoStartDt: getVal(3, row),
-			saldoStartKt: getVal(4, row),
+			DtStart: getVal(3, row),
+			KtStart: getVal(4, row),
 			periodicAmounts: [],
-			totalDtAmounts: getVal(diap.e.c - 3, row),
-			totalKtAmounts: getVal(diap.e.c - 2, row),
-			totalDtSaldo: getVal(diap.e.c - 1, row),
-			totalKtSaldo: getVal(diap.e.c, row)
+			Dt: getVal(diap.e.c - 3, row),
+			Kt: getVal(diap.e.c - 2, row),
+			DtEnd: getVal(diap.e.c - 1, row),
+			KtEnd: getVal(diap.e.c, row)
 		}
 		periods.forEach( p => {
 			let pAmount = {
@@ -70,7 +70,7 @@ export function readData (path) {
 	return {periods, data}    
 }
 
-export function saveData(data, path, done_func) {
+export function saveData(data, path, header, done_func) {
 	// Вариант без форматирования
 	// const wb = XLSX.utils.book_new(); // Новая книга
 	// const ws = XLSX.utils.json_to_sheet(data, {
@@ -83,22 +83,131 @@ export function saveData(data, path, done_func) {
 	const wb = new ExcelJS.Workbook()
 	wb.creator = "Finomancer Lab"
 	const sh = wb.addWorksheet("Данные по ОСВ")
-	sh.colums = [
-		{width: 10},
-		{width: 30},
-		{width: 40},
-		{width: 40},
-		{width: 40},
-		{width: 40},
-		{width: 40},
-		{width: 40},
-	]
 
-	sh.addRow(["Отчет по ОСВ за 1 полугодие 2019 года"])
-	sh.addRow(['000','Счет начального заполнения',0,10, 0,0, 0,10])
-	sh.getRow(0).font = {name: "Arial", family: 1, size: 16}
+	// идентификаторы колонок должны совпадать с именами в объекте таблицы
+	sh.columns = [
+		{key: "acc", width: 10},
+		{key: "accName", width: 40},
+		{key: "DtStart", width: 20},
+		{key: "KtStart", width: 20},
+		{key: "Dt", width: 20},
+		{key: "Kt", width: 20},
+		{key: "DtEnd", width: 20},
+		{key: "KtEnd", width: 20},
+	]
+	// данные для заполнения
+	
+	// СТИЛЕВЫЕ ЭЛЕМЕНТЫ
+	const fontColor = {argb: "FF003F2F"}
+	const fonts = {
+		headLine: {
+			name: "Arial", size: 10, color: fontColor
+		},
+		line: {
+			name: "Arial", size: 9
+		},
+		totals: {
+			name: "Arial", size: 10, color: fontColor, bold: true
+		},
+		header: {
+			name: "Arial", size: 12, bold: true
+		}
+	}
+
+	let border = {
+		top:  {style: "thin", color: {argb: "FFA0A0A0"}},
+		left: {style: "thin", color: {argb: "FFA0A0A0"}},
+		bottom: {style: "thin", color: {argb: "FFA0A0A0"}},
+		right: {style: "thin", color: {argb: "FFA0A0A0"}}
+	}
+
+	let fillHeader = {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: {argb:"FFD6E5CB"}
+	}
+	let fillLineRoot = {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: {argb:"FFE4F0DD"}
+	}
+
+	// ШАПКА
+	sh.addRow([""])
+	let head = sh.addRow([header])
+	sh.addRow([""])
+
+	head.font = fonts.header
+
+	let headRows = []
+	let h1 = sh.addRow(["Счет","Наименование", "Сальдо на начало периода", "",      "Обороты за период", "",      "Сальдо на конец периода",""])
+	let h2 = sh.addRow(["",    "",             "Дебет"                   , "Кредит","Дебет"            , "Кредит","Дебет"                 , "Кредит"    ])
+	headRows.push(h1, h2)
+
+	headRows.forEach(r => {
+		r.eachCell({includeEmpty: true}, (cell, col)=>{
+			cell.fill = fillHeader
+			cell.border = border
+			cell.font = fonts.headLine
+			cell.alignment = {horizontal: "center"}
+			if (col < 3) cell.alignment = {vertical: "top"}
+		})
+	})
+
+	// объединения в шапке - сальдо, обороты
+	sh.mergeCells("C4","D4")
+	sh.mergeCells("E4","F4")
+	sh.mergeCells("G4","H4")
+	// в колонках вертикально:
+	sh.mergeCells("A4","A5")
+	sh.mergeCells("B4","B5")
+	// выравнивание проставляем чтоб совсем красиво
+	// sh.getCell("A4").alignment = {vertical: "top"}
+	// sh.getCell("B4").alignment = {vertical: "top"}
+
+	const totals = {
+		DtStart: 0, KtStart: 0,
+		Dt: 0, Kt: 0,
+		DtEnd: 0, KtEnd: 0
+	}
+
+	// ==== MAIN DATA
+	//sh.addRows(tblDemo)
+	data.forEach(dataStr => {
+		let row = sh.addRow(dataStr)
+		row.eachCell({includeEmpty: true}, (cell, col)=>{
+			let level = dataStr.acc.split(".").length
+				
+			if (level == 1) {
+				cell.fill = fillLineRoot
+				cell.font = fonts.headLine
+			}
+			else {
+				cell.font = fonts.line
+			}
+			cell.border = border
+			if (col == 1) cell.alignment = {indent: level-1 , vertical: "top"}
+			if (col == 2) cell.alignment = {wrapText: true }
+			if (col > 2)  cell.numFmt = "0.00"
+		})
+		totals.DtStart += dataStr.DtStart
+		totals.KtStart += dataStr.KtStart
+		totals.Dt += dataStr.Dt
+		totals.Kt += dataStr.Kt
+		totals.DtEnd += dataStr.DtEnd
+		totals.KtEnd += dataStr.KtEnd
+	})
+
+	let totalLine = sh.addRow(["Итого","",totals.DtStart, totals.KtStart, totals.Dt, totals.Kt, totals.DtEnd, totals.KtEnd])
+	totalLine.eachCell({includeEmpty: true}, (cell) => {
+		cell.fill = fillHeader
+		cell.font = fonts.totals
+		cell.border = border
+		cell.numFmt = "0.00"
+	})
+
 	wb.xlsx.writeFile(path).then( result => {
-		return done_func(result)
+		console.log("Сохранение завершено",result)    
 	})
 }
 

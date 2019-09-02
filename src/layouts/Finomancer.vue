@@ -69,12 +69,12 @@
     
     
     <!-- Скрытые элементы типа диалоговых окон -->
-    <q-dialog v-model="errorInfo" transition-show="flip-down" transition-hide="flip-up">
+    <q-dialog v-model="showMsg" transition-show="flip-down" transition-hide="flip-up">
       <q-card>
         <q-card-section>
-          <div class="text-h6">Внимание</div>
+          <div class="text-h6">{{messageHeader}}</div>
         </q-card-section>        
-        <q-card-section v-html="errorInfoText">
+        <q-card-section v-html="messageText">
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="OK" color="primary" v-close-popup />
@@ -117,8 +117,9 @@ export default {
       currForm: { id: "osv", desc: "ОСВ общая" },
       currAcc: "",
       currPeriod: '',
-      errorInfo: false,
-      errorInfoText: "Сообщение!"
+      showMsg: false,
+      messageHeader: "",
+      messageText: "Сообщение!"
     };
   },
   methods: {
@@ -154,8 +155,9 @@ export default {
         errors.push("Не выбран счет для формирования данного вида отчета")
       }
       if (errors.length) {
-        this.errorInfoText = errors.join("<br/>")
-        this.errorInfo = true
+        this.messageHeader = "Внимание!"
+        this.messageText = errors.join("<br/>")
+        this.showMsg = true
       }
       // формируем данные
       switch (this.currForm.id) {
@@ -181,13 +183,13 @@ export default {
       const fileToSaveData = dialog.showSaveDialog(null, opt) //null, opt, fn => {
       if (fileToSaveData === undefined) return;
 
-      this.reportName = fileToSaveData;
+      //this.reportName = fileToSaveData;
 
-      Excel.saveData(this.formData, fileToSaveData, result => {
-        console.log(result);        
-      })
-
-      console.log("Счет был изменен " + value);
+      Excel.saveData(this.formData, fileToSaveData, this.form_header)
+      
+      this.messageHeader = "Файл сохранен"
+      this.messageText = "Файл успешно записан"
+      this.showMsg = true 
     }
   }
 };

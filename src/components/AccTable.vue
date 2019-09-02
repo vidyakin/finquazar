@@ -2,8 +2,8 @@
   <table class="tbl" v-show="tableData.length > 0">
     <thead>
       <tr>
-        <th rowspan="2" style="width: 70px;">Счет</th>
-        <th rowspan="2" style="width: 300px;">Наименование</th>
+        <th rowspan="2" style="width: 80px;">Счет</th>
+        <th rowspan="2" style="width: 350px;">Наименование</th>
         <th colspan="2">Начальное сальдо</th>
         <th colspan="2">Обороты</th> <!-- столько раз сколько периодов * 2 -->
         <th colspan="2">Конечное сальдо</th>
@@ -19,15 +19,15 @@
     </thead>
     <tbody>
       <template v-for="tRow in this.tableData" >
-        <tr :class="{base: tRow.acc.indexOf('.') == -1 }" :key="tRow.acc">
+        <tr :class="{base: tRow.acc.indexOf('.') == -1, sub: tRow.acc.split('.').length == 2, sub2: tRow.acc.split('.').length == 3 }" :key="tRow.acc">
           <td >{{tRow.acc }}</td>
           <td>{{tRow.accName}}</td>
-          <td>{{tRow.НачОстатокДт | fin_format }}</td>
-          <td>{{tRow.НачОстатокКт | fin_format }}</td>
-          <td>{{tRow.ОборотыДт | fin_format }}</td>
-          <td>{{tRow.ОборотыКт | fin_format }}</td>
-          <td>{{tRow.КонОстатокДт | fin_format }}</td>
-          <td>{{tRow.КонОстатокКт | fin_format }}</td>
+          <td>{{tRow.DtStart | fin_format }}</td>
+          <td>{{tRow.KtStart | fin_format }}</td>
+          <td>{{tRow.Dt | fin_format }}</td>
+          <td>{{tRow.Kt | fin_format }}</td>
+          <td>{{tRow.DtEnd | fin_format }}</td>
+          <td>{{tRow.KtEnd | fin_format }}</td>
         </tr>
       </template>
       
@@ -124,20 +124,26 @@ td {
   padding-left: 5px;
   padding-right: 5px;
 }
+/* Все по правому кроме 1 и 2 колонок */
 .tbl td {
   text-align: right;
-}
-.tbl td:nth-child(1) {
-  text-align: left;
-  padding-left: 15px
 }
 .tbl td:nth-child(2) {
   text-align: left;
 }
+.tbl td:nth-child(1) {
+  text-align: left;
+}
+/* фон корневого счета - зелененький */
 .tbl tr.base {
   background-color: #d9f3e3;
 }
-.tbl tr.base td:nth-child(1) {
-  padding-left: 5px
+
+/* отступы для 1 и 2 уровней */
+.tbl tr.sub td:nth-child(1) {
+  padding-left: 15px
+}
+.tbl tr.sub2 td:nth-child(1) {
+  padding-left: 25px
 }
 </style>
