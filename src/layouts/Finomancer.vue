@@ -160,14 +160,17 @@ export default {
         this.showMsg = true
       }
       // формируем данные
+      let form_data
       switch (this.currForm.id) {
         case "osv":
-          let form_data = FinomancerForms.form1(this.rbs_data.data, this.currPeriod.p_id)
+          form_data = FinomancerForms.form1(this.rbs_data.data, this.currPeriod.p_id)
           this.formData = form_data.Результат
           this.form_header = form_data.ЗаголовокФормы
           break
         case "osv_acc": 
-          FinomancerForms.form2(this.rbs_data, this.currPeriod)
+          form_data = FinomancerForms.form2(this.rbs_data.data, this.currAcc, this.currPeriod.p_id)
+          this.formData = form_data.Результат
+          this.form_header = form_data.ЗаголовокФормы
           break
         case "an_acc":
           FinomancerForms.form3(this.rbs_data, this.currPeriod)

@@ -3,6 +3,11 @@
 const XLSX = require("xlsx")
 const ExcelJS = require("exceljs/modern.nodejs")
 
+/**
+ * Чтение данных из экселя
+ * 
+ * @param {string} path Путь к файлу, полученному из диалога выбора файлов
+ */
 export function readData (path) {
 
 	const wb = XLSX.readFile(path)    
@@ -39,7 +44,7 @@ export function readData (path) {
 	}
 
 	// очистка строки от пробелов если это строка 
-	const conv = v => typeof(v) == "string" ? parseFloat(v.replace(/\s/g,'')) : v
+	const conv = v => typeof(v) == "string" ? parseFloat(v.replace(/\s/g,"")) : v
 
 	// собираем данные в таблицу
 	let line = {}
@@ -73,7 +78,14 @@ export function readData (path) {
 	return {periods, data}    
 }
 
-export function saveData(data, path, header, done_func) {
+/**
+ * Сохранение данных в файл
+ * 
+ * @param {array of objects} data - массив данных, которые надо сохранить
+ * @param {string} path - путь к файлу для сохранения
+ * @param {*} header - заголовок для названия отчета в экселе
+ */
+export function saveData(data, path, header) {
 	// Вариант без форматирования
 	// const wb = XLSX.utils.book_new(); // Новая книга
 	// const ws = XLSX.utils.json_to_sheet(data, {
@@ -103,18 +115,10 @@ export function saveData(data, path, header, done_func) {
 	// СТИЛЕВЫЕ ЭЛЕМЕНТЫ
 	const fontColor = {argb: "FF003F2F"}
 	const fonts = {
-		headLine: {
-			name: "Arial", size: 10, color: fontColor
-		},
-		line: {
-			name: "Arial", size: 9
-		},
-		totals: {
-			name: "Arial", size: 10, color: fontColor, bold: true
-		},
-		header: {
-			name: "Arial", size: 12, bold: true
-		}
+		headLine: {name: "Arial", size: 10, color: fontColor},
+		line: {name: "Arial", size: 9},
+		totals: {name: "Arial", size: 10, color: fontColor, bold: true},
+		header: {name: "Arial", size: 12, bold: true}
 	}
 
 	let border = {
@@ -179,7 +183,7 @@ export function saveData(data, path, header, done_func) {
 	data.forEach(dataStr => {
 		let row = sh.addRow(dataStr)
 		row.eachCell({includeEmpty: true}, (cell, col)=>{
-			let level = dataStr.acc.split(".").length
+			let level = dataStr.acc !== 0 && dataStr.acc.indexOf(".")!==-1 ? dataStr.acc.split(".").length : 0
 				
 			if (level == 1) {
 				cell.fill = fillLineRoot

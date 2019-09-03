@@ -2,7 +2,7 @@
   <table class="tbl" v-show="tableData.length > 0">
     <thead>
       <tr>
-        <th rowspan="2" style="width: 80px;">Счет</th>
+        <th rowspan="2" style="width: 90px;">Счет</th>
         <th rowspan="2" style="width: 350px;">Наименование</th>
         <th colspan="2">Начальное сальдо</th>
         <th colspan="2">Обороты</th> <!-- столько раз сколько периодов * 2 -->
@@ -19,8 +19,16 @@
     </thead>
     <tbody>
       <template v-for="tRow in this.tableData" >
-        <tr :class="{base: tRow.acc.indexOf('.') == -1, sub: tRow.acc.split('.').length == 2, sub2: tRow.acc.split('.').length == 3 }" :key="tRow.acc">
-          <td >{{tRow.acc }}</td>
+        <tr 
+          :key="tRow.acc + '_' + tRow.accName"
+          :class="{
+            base: tRow.acc === 0 ? false : tRow.acc.indexOf('.') == -1, 
+            sub: tRow.acc === 0 ? false : tRow.acc.split('.').length == 2, 
+            sub2: tRow.acc === 0 ? false : tRow.acc.split('.').length == 3,
+            subconto: tRow.acc === 0 || tRow.acc.match(/\d{10,12}/g)
+          }" 
+        >
+          <td >{{tRow.acc === 0 ? "" : tRow.acc }}</td>
           <td>{{tRow.accName}}</td>
           <td>{{tRow.DtStart | fin_format }}</td>
           <td>{{tRow.KtStart | fin_format }}</td>
@@ -145,5 +153,13 @@ td {
 }
 .tbl tr.sub2 td:nth-child(1) {
   padding-left: 25px
+}
+/* для субконто */
+.subconto td {
+  background-color: rgb(225, 228, 227);
+  font-size: 8pt
+}
+.subconto td:nth-child(2) {
+  padding-left: 15px;
 }
 </style>
