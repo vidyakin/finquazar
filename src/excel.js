@@ -38,6 +38,9 @@ export function readData (path) {
 		pCol += 5
 	}
 
+	// очистка строки от пробелов если это строка 
+	const conv = v => typeof(v) == "string" ? parseFloat(v.replace(/\s/g,'')) : v
+
 	// собираем данные в таблицу
 	let line = {}
 	for (let row = 3; row <= diap.e.r; row++) {
@@ -45,21 +48,21 @@ export function readData (path) {
 			lType: getVal(0, row),
 			acc: getVal(1, row),
 			accName: getVal(2, row),
-			DtStart: getVal(3, row),
-			KtStart: getVal(4, row),
+			DtStart: conv(getVal(3, row)),
+			KtStart: conv(getVal(4, row)),
 			periodicAmounts: [],
-			Dt: getVal(diap.e.c - 3, row),
-			Kt: getVal(diap.e.c - 2, row),
-			DtEnd: getVal(diap.e.c - 1, row),
-			KtEnd: getVal(diap.e.c, row)
+			Dt: conv(getVal(diap.e.c - 3, row)),
+			Kt: conv(getVal(diap.e.c - 2, row)),
+			DtEnd: conv(getVal(diap.e.c - 1, row)),
+			KtEnd: conv(getVal(diap.e.c, row))
 		}
 		periods.forEach( p => {
 			let pAmount = {
 				p_id: p.period.p_id,
-				Dt: getVal(p.col+1, row), // pCol - колонка где номер периода. Дебет - после нее
-				Kt: getVal(p.col+2, row),
-				SaldoDt: getVal(p.col+3, row),
-				SaldoKt: getVal(p.col+4, row)
+				Dt: conv(getVal(p.col+1, row)), // pCol - колонка где номер периода. Дебет - после нее
+				Kt: conv(getVal(p.col+2, row)),
+				SaldoDt: conv(getVal(p.col+3, row)),
+				SaldoKt: conv(getVal(p.col+4, row))
 			}
 			line.periodicAmounts.push(pAmount)
 		})
@@ -149,8 +152,8 @@ export function saveData(data, path, header, done_func) {
 			cell.fill = fillHeader
 			cell.border = border
 			cell.font = fonts.headLine
-			cell.alignment = {horizontal: "center"}
-			if (col < 3) cell.alignment = {vertical: "top"}
+			cell.alignment = {horizontal: "center", vertical: "top"}
+			// if (col < 3) cell.alignment = {vertical: "top"}
 		})
 	})
 
@@ -188,7 +191,10 @@ export function saveData(data, path, header, done_func) {
 			cell.border = border
 			if (col == 1) cell.alignment = {indent: level-1 , vertical: "top"}
 			if (col == 2) cell.alignment = {wrapText: true }
-			if (col > 2)  cell.numFmt = "0.00"
+			if (col > 2)  {
+				cell.numFmt = "0.00"
+				cell.alignment = {vertical: "top"}
+			}
 		})
 		totals.DtStart += dataStr.DtStart
 		totals.KtStart += dataStr.KtStart

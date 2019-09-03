@@ -178,7 +178,7 @@ export default {
     save(value) {
       let opt = {
         title: "Выберите файл Excel",
-        filters: [{ name: "Excel файлы", extensions: ["xls", "xlsx"] }]
+        filters: [{ name: "Excel файлы", extensions: ["xlsx"] }]
       };
       const fileToSaveData = dialog.showSaveDialog(null, opt) //null, opt, fn => {
       if (fileToSaveData === undefined) return;
