@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 const XLSX = require("xlsx")
-const ExcelJS = require("exceljs/modern.nodejs")
+const ExcelJS = require("exceljs")
 
 /**
  * Чтение данных из экселя
@@ -50,6 +50,7 @@ export function readData (path) {
 	let line = {}
 	for (let row = 3; row <= diap.e.r; row++) {
 		line = {
+			rowN: row,
 			lType: getVal(0, row),
 			acc: getVal(1, row),
 			accName: getVal(2, row),

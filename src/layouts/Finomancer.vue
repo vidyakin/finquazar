@@ -64,7 +64,7 @@
       <h6>{{form_header}}</h6>
     </div>
     <div class="row">
-      <AccTable :tableData="formData" :header="form_header"></AccTable>
+      <AccTable :tableData="formData" :header="form_header" :formType="currForm.id"></AccTable>
     </div>
     
     
@@ -123,24 +123,25 @@ export default {
     };
   },
   methods: {
-    chooseFile: function(event) {
+    chooseFile: async function(event) {
       let opt = {
         title: "Выберите файл Excel",
         filters: [{ name: "Excel файлы", extensions: ["xls", "xlsx"] }]
       };
-      const fn = dialog.showOpenDialog(null, opt) //null, opt, fn => {
+      const fn = await dialog.showOpenDialog(null, opt) //null, opt, fn => {
       if (fn === undefined) return;
-      this.filename = fn[0];
+      this.filename = fn.filePaths[0];
 
       this.rbs_data = Excel.readData(this.filename)//.then((periods, data)=>{
-      
+      // сбрасываем списки
       this.periods = []
+      this.accs = []
       this.rbs_data.periods.map(p => this.periods.push(p.period))
       this.rbs_data.data.forEach(d => { if( /^\d{2,3}$/.test(d.acc)) this.accs.push(d.acc)})
       this.currPeriod = this.periods[0]
-      this.currAcc = "01"
+      this.currAcc = this.accs[0]
       
-      this.tableData = []
+      this.formData = []
 
       console.log(this.periods);        
       // });
@@ -181,17 +182,17 @@ export default {
 
       console.log("Форма: %s, период: %s, Счет %s", this.currForm, this.currPeriod, this.currAcc);
     },
-    save(value) {
+    save: async function(event) {
       let opt = {
         title: "Выберите файл Excel",
         filters: [{ name: "Excel файлы", extensions: ["xlsx"] }]
       };
-      const fileToSaveData = dialog.showSaveDialog(null, opt) //null, opt, fn => {
-      if (fileToSaveData === undefined) return;
+      const dialogResult = await dialog.showSaveDialog(null, opt) //null, opt, fn => {
+      if (dialogResult.canceled) return;
 
       //this.reportName = fileToSaveData;
 
-      Excel.saveData(this.formData, fileToSaveData, this.form_header)
+      const saveResult = Excel.saveData(this.formData, dialogResult.filePath, this.form_header)
       
       this.messageHeader = "Файл сохранен"
       this.messageText = "Файл успешно записан"

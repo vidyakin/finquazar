@@ -20,12 +20,14 @@
     <tbody>
       <template v-for="tRow in this.tableData" >
         <tr 
-          :key="tRow.acc + '_' + tRow.accName"
+          :key="tRow.rowN"
           :class="{
             base: tRow.acc === 0 ? false : tRow.acc.indexOf('.') == -1, 
             sub: tRow.acc === 0 ? false : tRow.acc.split('.').length == 2, 
             sub2: tRow.acc === 0 ? false : tRow.acc.split('.').length == 3,
-            subconto: tRow.acc === 0 || tRow.acc.match(/\d{10,12}/g)
+            subconto: tRow.acc === 0 || tRow.acc.match(/\d{10,12}/g),
+            korr_acc: tRow.accName.match(/^\d{2,3}$/),
+            analys: ft == 'acc_an'
           }" 
         >
           <td >{{tRow.acc === 0 ? "" : tRow.acc }}</td>
@@ -94,12 +96,12 @@ let tblDemo = [
   },
 ]
 
-
 export default {
-    props: ['tableData'],      
+    props: ["tableData", "formType"],      
     data () {
         return {
-          tbl: tblDemo
+          tbl: tblDemo,
+          ft: this.formType
         }
     },
     computed: {
@@ -110,6 +112,10 @@ export default {
     },
     filters: {
       fin_format: value => value.toLocaleString('ru', {style:'decimal', minimumFractionDigits: 2})
+    },
+    created() {
+      console.log("Таблица создалась");
+      // this.ft = this.formType;
     }
 }
 </script>
@@ -132,6 +138,11 @@ td {
   padding-left: 5px;
   padding-right: 5px;
 }
+.tbl tr:hover td {
+    background-color: lightcyan;
+    transition: all .5s ease-in-out;
+}
+
 /* Все по правому кроме 1 и 2 колонок */
 .tbl td {
   text-align: right;
@@ -156,10 +167,19 @@ td {
 }
 /* для субконто */
 .subconto td {
-  background-color: rgb(225, 228, 227);
-  font-size: 8pt
+  background-color: rgb(250, 250, 220);
+  font-size: 9pt
 }
 .subconto td:nth-child(2) {
   padding-left: 15px;
 }
+.korr_acc td {
+  background-color: white;
+}
+/* Корр. счет */
+.korr_acc td:nth-child(2) {
+  font-weight: 600;
+  padding-left: 25px;  
+}
+
 </style>
