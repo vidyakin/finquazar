@@ -172,8 +172,11 @@ export default {
           this.formData = form_data.Результат
           this.form_header = form_data.ЗаголовокФормы
           break
-        case "an_acc":
-          FinomancerForms.form3(this.rbs_data, this.currPeriod)
+        case "acc_an":
+          form_data = FinomancerForms.form3(this.rbs_data.data, this.currAcc, this.currPeriod.p_id)
+          // [this.formData, this.form_header] = [form_data.Результат, form_data.ЗаголовокФормы]
+          this.formData = form_data.Результат
+          this.form_header = form_data.ЗаголовокФормы
       }
 
       console.log("Форма: %s, период: %s, Счет %s", this.currForm, this.currPeriod, this.currAcc);

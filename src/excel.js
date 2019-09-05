@@ -34,7 +34,7 @@ export function readData (path) {
 			periods.push({
 				col: pCol,
 				period: {
-					p_id: cell + "_" + cell1.replace("кв. ",""),
+					p_id: cell + "_" + cell1.replace("кв. ","").replace(/\(.+\) /g,""),
 					p_name: cell + " " + cell1
 				}
 			})
