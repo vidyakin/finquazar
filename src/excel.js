@@ -16,7 +16,9 @@ export function readData (path) {
 	const diap = XLSX.utils.decode_range(sh["!ref"]) // 'A1:AI192 => {s: {c:0, r:0}, e: {c:34, r:192}}'
 	const getVal = (c, r) => {
 		let cell = sh[XLSX.utils.encode_cell({c, r})]
-		return cell === undefined ? 0.0 : cell.v || 0.0 // упрощающая функция
+		return cell === undefined ? 0.0 : 
+			typeof(cell.v) === "string" ? cell.v.trim() : cell.v 
+			|| 0.0 // упрощающая функция
 	}
 
 	let data = [], periods = []
