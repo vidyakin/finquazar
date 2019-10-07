@@ -38,7 +38,7 @@ module.exports = function (ctx) {
 				//"QPage",
 				//"QToolbar",
 				//"QToolbarTitle",
-				"QBtn",
+				"QBtn", "QBtnGroup", "QBtnToggle",
 				"QIcon",
 				"QList",
 				"QItem",
@@ -141,7 +141,7 @@ module.exports = function (ctx) {
 				// chainWebpack also available besides this extendWebpack
 				cfg.devtool = "source-map"
 			},
-
+			bundler: "packager",
 			packager: {
 				// https://github.com/electron-userland/electron-packager/blob/master/docs/api.md#options
 

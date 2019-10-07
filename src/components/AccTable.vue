@@ -2,8 +2,8 @@
   <table class="tbl" v-show="tableData.length > 0">
     <thead>
       <tr>
-        <th rowspan="2" style="width: 90px;">Счет</th>
-        <th rowspan="2" style="width: 350px;">Наименование</th>
+        <th rowspan="2" style="width: 350px;">Счет</th>
+        <th rowspan="2" style="width: 100px;">ИНН</th>
         <th colspan="2">Начальное сальдо</th>
         <th colspan="2">Обороты</th> <!-- столько раз сколько периодов * 2 -->
         <th colspan="2">Конечное сальдо</th>
@@ -22,7 +22,7 @@
         <tr 
           :key="tRow.rowN"
           :class="{
-            base: tRow.acc === 0 ? false : tRow.acc.indexOf('.') == -1, 
+            base: tRow.acc === 0 ? false : tRow.acc.indexOf('.') == -1 && tRow.acc.length <=3, 
             sub: tRow.acc === 0 ? false : tRow.acc.split('.').length == 2, 
             sub2: tRow.acc === 0 ? false : tRow.acc.split('.').length == 3,
             subconto: tRow.acc === 0 || tRow.acc.match(/\d{10,12}/g),
@@ -30,14 +30,24 @@
             analys: ft == 'acc_an'
           }" 
         >
-          <td >{{tRow.acc === 0 ? "" : tRow.acc }}</td>
-          <td>{{tRow.accName}}</td>
-          <td>{{tRow.DtStart | fin_format }}</td>
-          <td>{{tRow.KtStart | fin_format }}</td>
-          <td>{{tRow.Dt | fin_format }}</td>
-          <td>{{tRow.Kt | fin_format }}</td>
-          <td>{{tRow.DtEnd | fin_format }}</td>
-          <td>{{tRow.KtEnd | fin_format }}</td>
+          <!-- это ИНН -->
+          <template v-if="tRow.acc === 0 || tRow.acc.match(/\d{10,12}/g)"> 
+            <td>{{ tRow.accName }}</td>
+            <td>{{ tRow.acc || "" }}</td>
+          </template>
+          <!-- Это счет любого уровня -->
+          <td colspan="2" v-else-if="tRow.acc !== 0 && ((tRow.acc.indexOf('.') == -1 && tRow.acc.length <=3) || tRow.acc.split('.').length >= 2)">{{tRow.acc + ", " + tRow.accName }}</td>
+          <!-- это другие данные (субконто) -->
+          <template v-else>
+            <td>{{ tRow.acc === 0 ? tRow.accName : tRow.acc }}</td>
+            <td>{{ tRow.acc || "" }}</td>
+          </template>          
+          <td class="nums">{{tRow.DtStart | fin_format }}</td>
+          <td class="nums">{{tRow.KtStart | fin_format }}</td>
+          <td class="nums">{{tRow.Dt | fin_format }}</td>
+          <td class="nums">{{tRow.Kt | fin_format }}</td>
+          <td class="nums">{{tRow.DtEnd | fin_format }}</td>
+          <td class="nums">{{tRow.KtEnd | fin_format }}</td>
         </tr>
       </template>
       
@@ -55,45 +65,7 @@ let tblDemo = [
     ОборотыДт: 0.0,    ОборотыКт: 0.0,
     КонОстатокДт: 0.0, КонОстатокКт: 0.0
   },
-  {
-    acc:'01',
-    acc_name: 'Основные средства',
-    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
-    ОборотыДт: 0.0,    ОборотыКт: 0.0,
-    КонОстатокДт: 0.0, КонОстатокКт: 0.0
-  },
-  {
-    acc:'01.01',
-    accName: 'Основные средства в организации',
-    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
-    ОборотыДт: 0.0,    ОборотыКт: 0.0,
-    КонОстатокДт: 0.0, КонОстатокКт: 0.0
-  },
-  {
-    acc:'01.03',
-    accName: 'Арендованное имущество',
-    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
-    ОборотыДт: 0.0,    ОборотыКт: 0.0,
-    КонОстатокДт: 0.0, КонОстатокКт: 0.0
-  },{
-    acc:'02',
-    accName: 'Амортизация основных средств',
-    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
-    ОборотыДт: 0.0,    ОборотыКт: 0.0,
-    КонОстатокДт: 0.0, КонОстатокКт: 0.0
-  },{
-    acc:'02.01',
-    accName: 'Амортизация ОС, учитываемых на счете 01',
-    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
-    ОборотыДт: 0.0,    ОборотыКт: 0.0,
-    КонОстатокДт: 0.0, КонОстатокКт: 0.0
-  },{
-    acc:'02.03',
-    accName: 'Амортизация арендованного имущества',
-    НачОстатокДт: 0.0, НачОстатокКт: 0.0,
-    ОборотыДт: 0.0,    ОборотыКт: 0.0,
-    КонОстатокДт: 0.0, КонОстатокКт: 0.0
-  },
+  
 ]
 
 export default {
@@ -144,15 +116,15 @@ td {
 }
 
 /* Все по правому кроме 1 и 2 колонок */
-.tbl td {
+.tbl td.nums {
   text-align: right;
 }
-.tbl td:nth-child(2) {
+/* .tbl td:nth-child(2) {
   text-align: left;
 }
 .tbl td:nth-child(1) {
   text-align: left;
-}
+} */
 /* фон корневого счета - зелененький */
 .tbl tr.base {
   background-color: #d9f3e3;
@@ -170,9 +142,9 @@ td {
   background-color: rgb(250, 250, 220);
   font-size: 9pt
 }
-.subconto td:nth-child(2) {
-  padding-left: 15px;
-}
+.subconto td:nth-child(1) {
+  padding-left: 25px;
+} 
 .korr_acc td {
   background-color: white;
 }

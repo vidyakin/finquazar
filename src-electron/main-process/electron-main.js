@@ -25,6 +25,7 @@ function createWindow () {
 		}
 	})
 
+	
 	mainWindow.loadURL(process.env.APP_URL)
 
 	mainWindow.on("closed", () => {
@@ -32,6 +33,8 @@ function createWindow () {
 	})
 }
 
+console.log(">> APP URL: ",process.env.APP_URL)
+	
 app.on("ready", createWindow)
 
 app.on("window-all-closed", () => {
