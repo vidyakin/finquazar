@@ -2,6 +2,11 @@
   <div class="main">
     <div class="row">
       <img src="~/assets/logo-finomancer.png" alt="FINOMANCER" />
+      <div class="col1 spacer"></div>
+      <div class="column items-end firm">
+        <div class="firm_name">{{firm.name}}</div>
+        <div class="firm_inn">{{firm.inn != "" ? "ИНН " + firm.inn : ""}}</div>
+      </div>
     </div>
     <div class="row">
       <div class="col filestring">
@@ -78,7 +83,7 @@
                   <h6>{{data.ЗаголовокТаблицы}}</h6>
                 </div>
                 <!-- Линия данных -->
-                <AccTable :tableData="data.Результат" :formType="currForm.id"></AccTable>
+                <AccTable :tableData="data.Результат" :formType="currForm"></AccTable>
               </q-tab-panel>
             </q-tab-panels>
           </q-card>
@@ -185,6 +190,7 @@ export default {
       form_header: "", // заголовок формы
       rbs_data: [], // данные из файла Excel как есть
       form_data: [], // данные сформированной формы, для вывода
+      firm: {name: "", inn: ""},
 
       tab: "tabData",
       dataTab: "",
@@ -237,6 +243,7 @@ export default {
       // суем прочитанные данные и признак отметки = Ложь
       this.periods2 = [] // очищаем периоды 2
       this.rbs_data.periods.map(p => this.periods2.push({...p.period, chkd:false}))
+      this.firm = this.rbs_data.firm
       this.accs2 = []
       this.valid.period.valid = true
       this.valid.acc.valid = true
@@ -267,7 +274,6 @@ export default {
       }
     },
     checked: function(el, el2) {
-      console.log(el, el2) 
       if (el == 'period') {
         this.valid.period.valid = this.ОтмеченныеПериоды.length != 0
       }
@@ -312,7 +318,8 @@ export default {
       let form_data
       // Форма "ОСВ общая"
       if (this.currForm == "osv") {
-        form_data = FinomancerForms.form1(this.rbs_data.data, this.currPeriod.p_id)
+        this.form_data = FinomancerForms.form1(this.rbs_data.data, this.ОтмеченныеПериоды)
+        this.dataTab = "p_"+this.form_data[0].Период
       }
       
       // Форма "ОСВ по счету"
@@ -373,11 +380,23 @@ h6 {
   color: teal
 }
 .filestring {
-  color: rgb(51, 99, 170);
+  color: #34a9ff;
   padding-bottom: 5px;
 }
 .filename {
   font-weight: 600;
+}
+
+.firm {
+  color: dodgerblue;
+  line-height: 1.7rem;
+  margin-top: 15px;
+}
+.firm_name {
+  font-size: 1.8rem;
+}
+.firm_inn {
+  font-size: 0.8rem;
 }
 .main {
   margin: 15px;

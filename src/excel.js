@@ -22,7 +22,7 @@ export function readData (path) {
 	}
 
 	let data = [], periods = []
-
+	let firm = {inn: getVal(0, 0).replace("ИНН ",""), name: getVal(1, 0)}
     
 	// заполняем периоды
 	let pCol = 5
@@ -78,7 +78,7 @@ export function readData (path) {
 		data.push(line)
 	}
 
-	return {periods, data}    
+	return {periods, data, firm}    
 }
 
 /**

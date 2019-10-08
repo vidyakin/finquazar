@@ -2,8 +2,12 @@
   <table class="tbl" v-show="tableData.length > 0">
     <thead>
       <tr>
-        <th rowspan="2" style="width: 350px;">Счет</th>
-        <th rowspan="2" style="width: 100px;">ИНН</th>
+        <th v-if="formType == 'osv'" 
+            rowspan="2" colspan="2" style="width: 350px;">Счет</th>
+        <template v-else>
+          <th rowspan="2" style="width: 350px;">Счет</th>
+          <th rowspan="2" style="width: 100px;">ИНН</th>
+        </template>
         <th colspan="2">Начальное сальдо</th>
         <th colspan="2">Обороты</th> <!-- столько раз сколько периодов * 2 -->
         <th colspan="2">Конечное сальдо</th>
@@ -86,7 +90,7 @@ export default {
       fin_format: value => value.toLocaleString('ru', {style:'decimal', minimumFractionDigits: 2})
     },
     created() {
-      console.log("Таблица создалась");
+      console.log("Тип формы: ",this.formType);
       // this.ft = this.formType;
     }
 }
