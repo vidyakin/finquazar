@@ -63,13 +63,13 @@
       <q-separator/>
       <!-- ПАНЕЛЬ ДАННЫХ -->
       <q-tab-panels v-model="tab">
-        <q-tab-panel name="tabData">
+        <q-tab-panel name="tabData" class="q-pa-none">
             <!-- Заголовки закладок -->
           <q-card flat>
             <q-tabs v-model="dataTab" 
               dense class="text-light-blue-9" active-color="primary" align="left" narrow-indicator
             >
-              <q-tab v-for="data in form_data" :key="data.Период" :name="'p_'+data.Период" :label="data.ЗаголовокПериода" />
+              <q-tab v-for="Данные in form_data" :key="Данные.Период" :name="'p_'+Данные.Период" :label="Данные.ЗаголовокПериода" />
             </q-tabs>
             <q-separator v-show="form_data.length > 0"/>
             <!-- Панели закладок -->
@@ -77,13 +77,32 @@
               transition-prev="jump-up"
               transition-next="jump-down"
             >
-              <q-tab-panel v-for="data in form_data" :key="data.Период" :name="'p_'+data.Период">
-                <!-- Линия заголовка таблицы -->
+              <!-- q-pt-sm: padding top = small, q-pa-none: padding all = none -->
+              <q-tab-panel v-for="Данные in form_data" :key="Данные.Период" :name="'p_'+Данные.Период" class="q-pt-sm q-pa-none"> 
                 <div class="row">
-                  <h6>{{data.ЗаголовокТаблицы}}</h6>
-                </div>
-                <!-- Линия данных -->
-                <AccTable :tableData="data.Результат" :formType="currForm"></AccTable>
+                  <div class="col-auto text-grey-7 pad-5">
+                    <q-tabs vertical class="text-teal" dense v-model="acc_tab">
+                      <q-tab :name="'acc'+ДанныеПоСчету.Счет" :label="ДанныеПоСчету.Счет" v-for="ДанныеПоСчету in Данные.ДанныеЗаПериод" :key="ДанныеПоСчету.Счет" />
+                    </q-tabs>
+                  </div>
+                  <q-separator vertical></q-separator>
+                  <div class="col">
+                    <!-- Линия данных - счета в табах-->
+                    <q-tab-panels animated
+                      v-model="acc_tab"                  
+                      transition-prev="jump-up"
+                      transition-next="jump-up"
+                    >
+                      <q-tab-panel :name="'acc'+ДанныеПоСчету.Счет" class="q-pt-none" v-for="ДанныеПоСчету in Данные.ДанныеЗаПериод" :key="ДанныеПоСчету.Счет">
+                        <!-- Линия заголовка таблицы -->
+                        <div class="row">
+                          <h6>Оборотно сальдовая ведомость по счету {{ДанныеПоСчету.Счет}} за {{Данные.ЗаголовокПериода}}</h6>
+                        </div>                    
+                        <AccTable :tableData="ДанныеПоСчету.Результат" :formType="currForm"></AccTable>
+                      </q-tab-panel>
+                    </q-tab-panels>
+                  </div>
+                </div>                
               </q-tab-panel>
             </q-tab-panels>
           </q-card>
@@ -194,6 +213,7 @@ export default {
 
       tab: "tabData",
       dataTab: "",
+      acc_tab: "",
 
       currForm: "osv",
       showAccounts: false,
@@ -327,6 +347,7 @@ export default {
           //form_data = FinomancerForms.form2(this.rbs_data.data, this.currAcc, this.currPeriod.p_id)
           this.form_data = FinomancerForms.form2(this.rbs_data.data, this.ОтмеченныеСчета, this.ОтмеченныеПериоды)
           this.dataTab = "p_"+this.form_data[0].Период
+          this.acc_tab = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
       }
       // Форма "Анализ по счету"
       else if (this.currForm == "acc_an") {
@@ -388,15 +409,16 @@ h6 {
 }
 
 .firm {
+  font-family: Bebas;
   color: dodgerblue;
   line-height: 1.7rem;
-  margin-top: 15px;
+  margin-top: 10px;
 }
 .firm_name {
-  font-size: 1.8rem;
+  font-size: 1.9rem;
 }
 .firm_inn {
-  font-size: 0.8rem;
+  font-size: 1.1rem;
 }
 .main {
   margin: 15px;
@@ -418,5 +440,11 @@ h6 {
 }
 span.label {
   margin-right: 5px;
+}
+.no-pad {
+  padding: 0;
+}
+.pad-5 {
+  padding: 5px;
 }
 </style>
