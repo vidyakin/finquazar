@@ -21,8 +21,10 @@ export function readData (path) {
 			|| 0.0 // упрощающая функция
 	}
 
-	let data = [], periods = []
-	let firm = {inn: getVal(0, 0).replace("ИНН ",""), name: getVal(1, 0)}
+	let data = [], periods = [], firm = {inn: ""}
+	if (getVal(0, 0) != 0 && getVal(0, 0) != "") {
+		firm = {inn: getVal(0, 0).replace("ИНН ",""), name: getVal(1, 0)}
+	}	
     
 	// заполняем периоды
 	let pCol = 5
