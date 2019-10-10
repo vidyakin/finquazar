@@ -78,7 +78,11 @@
               transition-next="jump-down"
             >
               <!-- q-pt-sm: padding top = small, q-pa-none: padding all = none -->
-              <q-tab-panel v-for="Данные in form_data" :key="Данные.Период" :name="'p_'+Данные.Период" class="q-pt-sm q-pa-none"> 
+              <q-tab-panel class="q-pt-sm q-pa-none" :name="'p_'+Данные.Период" v-for="Данные in form_data" :key="Данные.Период">
+                <TabOsvByAcc :data="Данные" :currForm="currForm" v-if="currForm == 'osv_acc'"/>
+                <TabCommonOsv :data="Данные" :currForm="currForm" v-else />
+              </q-tab-panel>
+              <!-- <q-tab-panel v-for="Данные in form_data" :key="Данные.Период" :name="'p_'+Данные.Период" class="q-pt-sm q-pa-none"> 
                 <div class="row">
                   <div class="col-auto text-grey-7 pad-5">
                     <q-tabs vertical class="text-teal" dense v-model="acc_tab">
@@ -87,14 +91,14 @@
                   </div>
                   <q-separator vertical></q-separator>
                   <div class="col">
-                    <!-- Линия данных - счета в табах-->
+                    <!- - Линия данных - счета в табах- ->
                     <q-tab-panels animated
                       v-model="acc_tab"                  
                       transition-prev="jump-up"
                       transition-next="jump-up"
                     >
                       <q-tab-panel :name="'acc'+ДанныеПоСчету.Счет" class="q-pt-none" v-for="ДанныеПоСчету in Данные.ДанныеЗаПериод" :key="ДанныеПоСчету.Счет">
-                        <!-- Линия заголовка таблицы -->
+                        <!- - Линия заголовка таблицы - ->
                         <div class="row">
                           <h6>Оборотно сальдовая ведомость по счету {{ДанныеПоСчету.Счет}} за {{Данные.ЗаголовокПериода}}</h6>
                         </div>                    
@@ -103,7 +107,7 @@
                     </q-tab-panels>
                   </div>
                 </div>                
-              </q-tab-panel>
+              </q-tab-panel> -->
             </q-tab-panels>
           </q-card>
          </q-tab-panel>
@@ -182,6 +186,9 @@
 
 <script>
 import AccTable from "../components/AccTable";
+import TabOsvByAcc from "../components/Tables/TabOsvByAcc";
+import TabCommonOsv from "../components/Tables/TabCommonOsv"
+
 import { log } from "util";
 const fs = require("fs");
 const { dialog } = require("electron").remote;
@@ -191,7 +198,7 @@ const FinomancerForms = require("./../fin_logic")
 // import {readData} from './../excel'
 
 export default {
-  components: { AccTable },
+  components: { AccTable, TabOsvByAcc, TabCommonOsv },
   data() {
     return {
       densed: true,
@@ -213,7 +220,7 @@ export default {
 
       tab: "tabData",
       dataTab: "",
-      acc_tab: "",
+      accTab: "",
 
       currForm: "osv",
       showAccounts: false,
@@ -347,7 +354,8 @@ export default {
           //form_data = FinomancerForms.form2(this.rbs_data.data, this.currAcc, this.currPeriod.p_id)
           this.form_data = FinomancerForms.form2(this.rbs_data.data, this.ОтмеченныеСчета, this.ОтмеченныеПериоды)
           this.dataTab = "p_"+this.form_data[0].Период
-          this.acc_tab = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
+          this.$store.state.selectedAcc = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
+          // this.acc_tab = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
       }
       // Форма "Анализ по счету"
       else if (this.currForm == "acc_an") {
