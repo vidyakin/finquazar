@@ -33,6 +33,7 @@ module.exports = function (ctx) {
 			components: [
 				"QLayout",
 				//"QHeader",
+				"QFooter",
 				//"QDrawer",
 				//"QPageContainer",
 				//"QPage",
@@ -46,7 +47,7 @@ module.exports = function (ctx) {
 				"QItemLabel",
 				"QSelect",
 				"QDialog",
-				"QCard", "QCardSection", "QCardActions","QTabs","QTab","QTabPanels","QTabPanel", "QSeparator",
+				"QCard", "QCardSection", "QCardActions","QTabs","QTab","QTabPanels","QTabPanel", "QSeparator","QSpace", "QBar",
 				"QCheckbox"
 			],
 

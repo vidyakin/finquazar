@@ -43,12 +43,13 @@ export default {
     },
     computed: {
         // двунаправленное свойство - читаем из стора и пишем туда через мутацию
+        // позволяет не использовать ручную обработку @input на компоненте
         currAcc: {
             get() {
                 return this.$store.state.selectedAcc
             },
             set(e) {
-                this.$store.commit('currAccChanged', e)
+                this.$store.commit('set', {field: 'selectedAcc', value: e})
             }
         }
     }
