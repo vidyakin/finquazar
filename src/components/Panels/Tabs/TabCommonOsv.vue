@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import AccTable from "../AccTable";
+import AccTable from "./Tables/AccTable";
 
 export default {
     props: ["data","currForm"],

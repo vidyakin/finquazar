@@ -9,6 +9,9 @@ export default new Vuex.Store({
 		appName: "Finomancer",
 		filename: "не выбран файл",
 
+		tab: "tabData",
+		periodTab: "",
+
 		firm: {name: "Не загружены данные", inn: ""}, // Информация о фирме, которая прислала данные
 		
 		selectedAcc: "", 				// Текущая закладка счета в таблице "ОСВ по счету"
@@ -31,7 +34,11 @@ export default new Vuex.Store({
 				msg: "Не выбран ни один счет!"
 			}
 		},
-
+		message: {
+			show: false,
+			header: "Заголовок",
+			text: "Сообщение!"
+		},
 		// Сгенерированные данные форм
 		formOSV: [],
 		formOSVAcc: [],
@@ -48,7 +55,13 @@ export default new Vuex.Store({
 				acc_an: "formAnalysisAcc"
 			}
 			return state[formNames[state.selectedForm]]
+		},
+		НевалидныеНастройки: state => {
+			let isNotValid = false
+			for (let k in state.valid) isNotValid = isNotValid || !state.valid[k].valid 
+			return isNotValid
 		}
+			
 	},
 	mutations: {
 		increment (state) {
@@ -70,6 +83,14 @@ export default new Vuex.Store({
 			if (form == "acc_an") {
 				state.showAccounts = true
 			}
+		},
+		show_msg(state, {header, text}) {
+			state.message.show = true
+			state.message.header = header
+			state.message.text = text
+		},
+		hide_msg(state) {
+			state.message.show = false
 		},
 		// Помещение в стейт данных из эксель файла
 		load_data(state, excel_data) {
