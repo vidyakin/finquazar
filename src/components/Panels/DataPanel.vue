@@ -25,7 +25,7 @@
 					
 			</q-tab-panel>
     </q-tab-panels>
-	<!-- <TabAnalysis :data="Данные" /> -->
+	<TabAnalysis :data="Данные" />
   </q-card>
 	
 </template>

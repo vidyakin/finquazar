@@ -18,6 +18,7 @@
 		<q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
 		<q-btn color="secondary" icon="save" label="Сохранить" @click="save" v-show="false"/>
     <q-btn color="secondary" icon="message" label="Сформировать и сохранить" @click="generate_and_save"/>
+    <q-btn label="form3 test" @click="download_form3" v-show="false" />
 	</div>
 </template>
 
@@ -90,7 +91,9 @@ export default {
 			this.$store.commit('set_valid', 'all') 
       this.mutate("tab","tabSettings") 
       
-			console.log("Данные загружены. Счета: ", this.$store.state.accs);
+      console.log("Данные загружены. Счета: ", this.$store.state.accs);
+      let an_string = JSON.stringify(loaded_data)
+      fs.writeFileSync("D:/Работа/Михаил Цалапов, БП/Excel/Форма 3, тест/raw_data.json", an_string)
       
       this.tableData = []
       this.formData = []
@@ -127,6 +130,7 @@ export default {
       // Форма "Анализ по счету"
       else if (this.selectedForm == "acc_an") {
           this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
+          
           // [this.formData, this.form_header] = [form_data.Результат, form_data.ЗаголовокФормы]        
       }
       // if (form_data.Результат.length > 0) {
@@ -169,6 +173,61 @@ export default {
     generate_and_save: async function() {
       this.generate()
       await this.save()
+    },
+    download_form3: function() {
+      let result = []
+      //this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
+      const data = this.raw_data
+      let curr_acc = ""
+      data.forEach(element => {
+          
+          curr_acc = element.lType == "ОСВ_общая" ? element.acc : curr_acc   // для хранения последнего счета чтоб сравнивать когда метка типа Ан_90.01.1 а самого счета нет
+          
+          let periodicData = {}
+          if (element.lType == "Ан_"+curr_acc) {
+              // для сворачивания по счету надо схлопнуть этот массив строк
+              let СтрокиКоррСчета = data.filter(str => str.lType == "Ан_"+curr_acc && str.accName == element.accName)
+              for (let СтрСчета of СтрокиКоррСчета) {
+                  for (let СтрПериода of СтрСчета.periodicAmounts) {
+                      let p = СтрПериода.p_id
+                      if (periodicData[p] == undefined) {
+                        periodicData[p] = {
+                          Dt: СтрПериода.Dt,
+                          Kt: СтрПериода.Kt
+                        }
+                      }
+                      else {
+                        periodicData[p].Dt += СтрПериода.Dt
+                        periodicData[p].Kt += СтрПериода.Kt
+                      }
+                  }
+              }
+              
+              // debug
+          }
+          
+          let isHeader = element.lType == "ОСВ_общая"
+          let isSubconto = element.lType == "ОСВ_"+curr_acc
+          // проверяем что если мы на строке кор счета и он уже ранее был добавлен, второй раз не добавляем и пропускаем эту строку
+          let korr = result.filter(el => el.acc == curr_acc && el.korr == element.accName)  // массив из результата, где объект с таким счетом и корр.счетом
+          let isKorrLine = element.lType == "Ан_"+curr_acc    // это строка с корр.счетом 
+          if (!isKorrLine || isKorrLine && korr.length == 0) {
+            // добавление обработанных данных в результат
+            result.push({
+                acc: isHeader ? element.acc : "",
+                isHeader,
+                isKorrLine,
+                isSubconto,        // заголовок субконто, по заданию не надо выводить, а суммировать только по счетам
+                korr: isKorrLine ? element.accName : "",   
+                level: isHeader ? element.acc.split(".").length-1 : 0,
+                subconto: isSubconto ? element.accName : "",
+                periodicData,
+
+            })
+          }         
+      })
+      console.log("РЕЗУЛЬТАТ ОБРАБОТКИ : ");      
+      console.log(result)
     }
 	}
 }

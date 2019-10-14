@@ -78,7 +78,6 @@ import CommandPanel from "../components/CommandPanel";
 import DataPanel from "../components/Panels/DataPanel"
 import SettingsPanel from "../components/Panels/SettingsPanel"
 
-const fs = require("fs");
 const { dialog } = require("electron").remote;
 
 export default {
