@@ -12,23 +12,19 @@
           </tr>
       </thead>
       <tbody>
-          <tr class="top_acc">
-              <td>90</td>
-              <td>Начальное сальдо</td>
-              <td></td>
-              <td></td>
-          </tr>
-          <tr class="sub_acc">
-              <td>90.01</td>
-              <td>Начальное сальдо</td>
-              <td></td>
-              <td></td>
-          </tr>
-          <tr class="sub_sub_acc">
-              <td>90.01.1</td>
-              <td>Начальное сальдо</td>
-              <td></td>
-              <td></td>
+          <tr :class="get_class(row)" v-for="row of analysis_data" :key="row.rowN">
+              <template v-if="row.isHeader">
+                <td>{{row.acc}}</td>
+                <td>Начальное сальдо</td>
+                <td>{{row.rowN}}</td>
+                <td>{{row.level}} {{row.isSubconto}}</td>
+              </template>
+              <template v-else-if="row.isSubconto">
+                <td>Обороты за :</td>
+                <td>Начальное сальдо 2</td>
+                <td>{{row.rowN}}</td>
+                <td>{{row.level}} {{row.isSubconto}}</td>
+              </template>
           </tr>
           <!-- Корр счет №1 -->
           <tr class="period_header">
@@ -61,120 +57,25 @@
 
 <script>
 export default {
-    props: ["tableData"],
     data() {
         return {
-            test_data: {
-                "periods": [
-                    {"col": 5, "period": { "p_id": "1_2015", "p_name": "1 кв. 2015"}}, {"col": 10, "period": {"p_id": "2_2015", "p_name": "2 кв. 2015"}}, {"col": 15, "period": {"p_id": "3_2015", "p_name": "3 кв. 2015"}}, {"col": 20, "period": {"p_id": "4_2015", "p_name": "4 кв. 2015"}}, {"col": 25, "period": {"p_id": "1_2016", "p_name": "1 кв. 2016"}}
-                ], 
-                "data": [
-                {"rowN": 77, "lType": "ОСВ_общая", "acc": "52", "accName": "Валютные счета", "DtStart": 0, "KtStart": 0, "periodicAmounts": 
-                [
-                    {"p_id": "1_2015","Dt": 0,"Kt": 0,"SaldoDt": 0,"SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 1945043.3, "Kt": 1938282.54, "SaldoDt": 6760.76, "SaldoKt": 0 }
-                ], "Dt": 1945043.3, "Kt": 1938282.54, "DtEnd": 6760.76, "KtEnd": 0 }, 
-                {"rowN": 78, "lType": "ОСВ_52", "acc": 0, "accName": "40702840000000005551, ПАО СБЕРБАНК, USD", "DtStart": 0, "KtStart": 0, "periodicAmounts": [
-                    {"p_id": "1_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 1945043.3, "Kt": 1938282.54, "SaldoDt": 6760.76, "SaldoKt": 0 }
-                ], "Dt": 1945043.3, "Kt": 1938282.54, "DtEnd": 6760.76, "KtEnd": 0 }, 
-                {"rowN": 79, "lType": "АнВал_52", "acc": "USD", "accName": 0, "DtStart": 0, "KtStart": 0, "periodicAmounts": [
-                    {"p_id": "1_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 25000, "Kt": 24900, "SaldoDt": 100, "SaldoKt": 0 }
-                ], "Dt": 25000, "Kt": 24900, "DtEnd": 100, "KtEnd": 0 }, 
-                {"rowN": 80, "lType": "АнВал_52", "acc": "USD", "accName": "57", "DtStart": 0, "KtStart": 0, "periodicAmounts": [
-                    {"p_id": "1_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 24000, "Kt": 900, "SaldoDt": 0, "SaldoKt": 0 }
-                ], "Dt": 24000, "Kt": 900, "DtEnd": 0, "KtEnd": 0 }, 
-                {"rowN": 81, "lType": "АнВал_52", "acc": "USD", "accName": "60", "DtStart": 0, "KtStart": 0, "periodicAmounts": [
-                    {"p_id": "1_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 0, "Kt": 24000, "SaldoDt": 0, "SaldoKt": 0 }
-                ], "Dt": 0, "Kt": 24000, "DtEnd": 0, "KtEnd": 0 }, 
-                {"rowN": 82, "lType": "АнВал_52", "acc": "USD", "accName": "62", "DtStart": 0, "KtStart": 0, "periodicAmounts": [
-                    {"p_id": "1_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 1000, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }
-                ], "Dt": 1000, "Kt": 0, "DtEnd": 0, "KtEnd": 0 }, 
-                {"rowN": 83, "lType": "АнВал_52", "acc": "USD", "accName": "91", "DtStart": 0, "KtStart": 0, "periodicAmounts": [
-                    {"p_id": "1_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "2_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "3_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "4_2015", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }, 
-                    {"p_id": "1_2016", "Dt": 0, "Kt": 0, "SaldoDt": 0, "SaldoKt": 0 }
-                ], "Dt": 0, "Kt": 0, "DtEnd": 0, "KtEnd": 0 }]
-            }
+            
         }
     },
     computed: {
-        prepared() {
-            let result = []
-            //this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
-            const data = this.raw_data
-            let curr_acc = ""
-            data.forEach(element => {
-                
-                curr_acc = element.lType == "ОСВ_общая" ? element.acc : curr_acc   // для хранения последнего счета чтоб сравнивать когда метка типа Ан_90.01.1 а самого счета нет
-                
-                let periodicData = {}
-                if (element.lType == "Ан_"+curr_acc) {
-                    // для сворачивания по счету надо схлопнуть этот массив строк
-                    let СтрокиКоррСчета = data.filter(str => str.lType == "Ан_"+curr_acc && str.accName == element.accName)
-                    for (let СтрСчета of СтрокиКоррСчета) {
-                        for (let СтрПериода of СтрСчета.periodicAmounts) {
-                            let p = СтрПериода.p_id
-                            if (periodicData[p] == undefined) {
-                                periodicData[p] = {
-                                Dt: СтрПериода.Dt,
-                                Kt: СтрПериода.Kt
-                                }
-                            }
-                            else {
-                                periodicData[p].Dt += СтрПериода.Dt
-                                periodicData[p].Kt += СтрПериода.Kt
-                            }
-                        }
-                    }
-                    
-                    // debug
-                }
-                
-                let isHeader = element.lType == "ОСВ_общая"
-                let isSubconto = element.lType == "ОСВ_"+curr_acc
-                // проверяем что если мы на строке кор счета и он уже ранее был добавлен, второй раз не добавляем и пропускаем эту строку
-                let korr = result.filter(el => el.acc == curr_acc && el.korr == element.accName)  // массив из результата, где объект с таким счетом и корр.счетом
-                let isKorrLine = element.lType == "Ан_"+curr_acc    // это строка с корр.счетом 
-                if (!isKorrLine || isKorrLine && korr.length == 0) {
-                    // добавление обработанных данных в результат
-                    result.push({
-                        acc: isHeader ? element.acc : "",
-                        isHeader,
-                        isKorrLine,
-                        isSubconto,        // заголовок субконто, по заданию не надо выводить, а суммировать только по счетам
-                        korr: isKorrLine ? element.accName : "",   
-                        level: isHeader ? element.acc.split(".").length-1 : 0,
-                        subconto: isSubconto ? element.accName : "",
-                        periodicData,
-
-                    })
-                }         
-            })
+        analysis_data() {
+            return this.$store.state.formAnalysisAcc
+        },
+        
+    },
+    methods: {
+        get_class(item) {
+            if (item.isHeader === true) {
+                if (item.level == 0) return "top_acc"
+                else if (item.level == 1) return "sub_acc"
+                else if (item.level == 2) return "sub_sub_acc"
+            }
+            else if (item.isSubconto) return "period_header"
         }
     },
     created() {

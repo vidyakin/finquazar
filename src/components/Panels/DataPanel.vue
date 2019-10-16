@@ -16,16 +16,15 @@
 			transition-next="jump-down"
     >
     	<!-- Расшифровка: q-pt-sm: padding top = small, q-pa-none: padding all = none -->
-			<q-tab-panel class="q-pt-sm q-pa-none" :name="'p_'+Данные.Период" 
-				v-for="Данные in form_data" :key="Данные.Период"
-			>
-					<TabCommonOsv :data="Данные" v-if="selectedForm == 'osv'" />
-					<TabOsvByAcc :data="Данные" v-else-if="selectedForm == 'osv_acc'"/>
-					<TabAnalysis :data="Данные" v-else />
+			<q-tab-panel v-for="Данные in form_data" :key="Данные.Период"
+				class="q-pt-sm q-pa-none" :name="'p_'+Данные.Период" >
+					
+				<TabCommonOsv :data="Данные" v-if="selectedForm == 'osv'" />
+				<TabOsvByAcc :data="Данные" v-else-if="selectedForm == 'osv_acc'"/>
 					
 			</q-tab-panel>
     </q-tab-panels>
-	<TabAnalysis :data="Данные" />
+	<!-- <TabAnalysis :data="Данные" /> -->
   </q-card>
 	
 </template>
@@ -33,29 +32,28 @@
 <script>
 import TabOsvByAcc from "./Tabs/TabOsvByAcc";
 import TabCommonOsv from "./Tabs/TabCommonOsv"
-import TabAnalysis from "./Tabs/TabAnalysis"
 
 export default {
-		components: { TabCommonOsv, TabOsvByAcc, TabAnalysis },
+	components: { TabCommonOsv, TabOsvByAcc },
     data() {
       return {
 				
+		}
+	},
+	computed: {
+		form_data() {
+			return this.$store.getters.getDataForSelectedForm
+		},
+		periodTab: {
+			get() { return this.$store.state.periodTab},
+			set(value) { 
+				this.$store.commit("set", {field: "periodTab", value}) 
 			}
 		},
-		computed: {
-			form_data() {
-				return this.$store.getters.getDataForSelectedForm
-			},
-			periodTab: {
-				get() { return this.$store.state.periodTab},
-				set(value) { 
-					this.$store.commit("set", {field: "periodTab", value}) 
-				}
-			},
-			selectedForm() {
-				return this.$store.state.selectedForm
-			}
+		selectedForm() {
+			return this.$store.state.selectedForm
 		}
+	}
 }
 </script>
 

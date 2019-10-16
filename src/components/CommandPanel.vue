@@ -18,7 +18,7 @@
 		<q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
 		<q-btn color="secondary" icon="save" label="Сохранить" @click="save" v-show="false"/>
     <q-btn color="secondary" icon="message" label="Сформировать и сохранить" @click="generate_and_save"/>
-    <q-btn label="form3 test" @click="download_form3" v-show="false" />
+    <q-btn label="form3 test" @click="generateForm3" v-show="true" />
 	</div>
 </template>
 
@@ -97,7 +97,8 @@ export default {
       
       this.tableData = []
       this.formData = []
-		},
+    },
+    
 		generate(value) {
       if (this.ОтмеченныеПериоды.length == 0) {
         this.valid.period.valid = false
@@ -125,21 +126,15 @@ export default {
           this.mutate("formOSVAcc", FinomancerForms.form2(this.raw_data, this.ОтмеченныеСчета, this.ОтмеченныеПериоды))
           this.mutate("periodTab", "p_"+this.form_data[0].Период)
           this.$store.state.selectedAcc = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
-          // this.acc_tab = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
       }
       // Форма "Анализ по счету"
       else if (this.selectedForm == "acc_an") {
-          this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
-          
-          // [this.formData, this.form_header] = [form_data.Результат, form_data.ЗаголовокФормы]        
+          this.mutate("formAnalysisAcc", FinomancerForms.form3New(this.raw_data, this.ОтмеченныеСчета))
       }
-      // if (form_data.Результат.length > 0) {
-      //   this.formData = form_data.Результат
-      //   this.form_header = form_data.ЗаголовокФормы
-      // }
 
       console.log("Форма: %s, период: %s, Счет %s", this.selectedForm, this.currPeriod, this.currAcc);
-		},
+    },
+    
 		save: async function(event) {
       let opt = {
         title: "Выберите папку для выгрузки файлов Excel",
@@ -176,58 +171,82 @@ export default {
     },
     download_form3: function() {
       let result = []
+      let table3 = []
       //this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
       const data = this.raw_data
+      const periods = this.$store.state.periods
+      if (data == undefined) {
+        this.$store.commit("show_msg", {header: "Нет данных", text: "Не загружены данные из Excel"})
+        return 
+      }
       let curr_acc = ""
       data.forEach(element => {
           
           curr_acc = element.lType == "ОСВ_общая" ? element.acc : curr_acc   // для хранения последнего счета чтоб сравнивать когда метка типа Ан_90.01.1 а самого счета нет
-          
-          let periodicData = {}
-          if (element.lType == "Ан_"+curr_acc) {
-              // для сворачивания по счету надо схлопнуть этот массив строк
-              let СтрокиКоррСчета = data.filter(str => str.lType == "Ан_"+curr_acc && str.accName == element.accName)
-              for (let СтрСчета of СтрокиКоррСчета) {
-                  for (let СтрПериода of СтрСчета.periodicAmounts) {
-                      let p = СтрПериода.p_id
-                      if (periodicData[p] == undefined) {
-                        periodicData[p] = {
-                          Dt: СтрПериода.Dt,
-                          Kt: СтрПериода.Kt
-                        }
-                      }
-                      else {
-                        periodicData[p].Dt += СтрПериода.Dt
-                        periodicData[p].Kt += СтрПериода.Kt
-                      }
-                  }
-              }
-              
-              // debug
+          let isHeader = element.lType == "ОСВ_общая"
+          let level = isHeader ? curr_acc.split(".").length -1 : 0
+          let isSubconto = element.lType == "ОСВ_"+curr_acc
+          let isKorrLine = element.lType == "Ан_"+curr_acc    // это строка с корр.счетом 
+
+          // Когда субконто - ищем все строки с таким счетом и вытащим все корр.счета
+          if (isSubconto) {
+            // проверяем что строки для субконто еще нет в результирующем массиве
+            if (table3.find(l => l.acc == curr_acc && l.isSubconto ==true) != undefined ) return 
+
+            // Все корр счета для текущего счета
+            let korrs = new Set(data.filter(el=> el.lType == "Ан_"+curr_acc).map(el => el.accName))  // множество для исключения дублей
+            // пройдем по всем периодам и вытащим данные по каждому субконто
+            let period_data = []
+            periods.forEach(p => {      // - по периодам
+              let korr_sums = []
+              korrs.forEach(korr => {   // - по субконто
+                
+                let period_sum = data.filter(el=> el.lType == "Ан_"+curr_acc && el.accName == korr)  // ввыбираем из всех данных по субконто данные по периоду
+                  .map(str => str.periodicAmounts.find(per=> per.p_id == p.p_id))   // для каждой строки отбираем только текущий период из всех колонок (0-й элемент т.к. фильтр)
+                  .reduce((acc, p) =>     // суммируем если нашлось несколько строк для корр счета (массивов периодов тоже будет несколько)
+                    ({  
+                      Dt: acc.Dt + p.Dt, Kt: acc.Kt + p.Kt
+                    }), 
+                    {     // начальный объект с суммами
+                      Dt:0, Kt:0
+                    })
+                korr_sums.push({
+                  korr,
+                  ...period_sum
+                })
+                     
+              })
+              // 
+              period_data["p"+p.p_id] = korr_sums
+            })
+            // полученный свернутый объект пихаем в массив в разрезе счета
+            table3.push({     // 
+              acc: curr_acc,
+              isHeader,
+              isSubconto,
+              period_data
+            })
+          }
+          else if (isHeader) {
+            // пихаем простые данные - когда строка это описание счета или субсчета
+            table3.push({
+              acc: curr_acc,
+              isHeader,
+              level,
+              periods: {}
+            })
           }
           
-          let isHeader = element.lType == "ОСВ_общая"
-          let isSubconto = element.lType == "ОСВ_"+curr_acc
-          // проверяем что если мы на строке кор счета и он уже ранее был добавлен, второй раз не добавляем и пропускаем эту строку
-          let korr = result.filter(el => el.acc == curr_acc && el.korr == element.accName)  // массив из результата, где объект с таким счетом и корр.счетом
-          let isKorrLine = element.lType == "Ан_"+curr_acc    // это строка с корр.счетом 
-          if (!isKorrLine || isKorrLine && korr.length == 0) {
-            // добавление обработанных данных в результат
-            result.push({
-                acc: isHeader ? element.acc : "",
-                isHeader,
-                isKorrLine,
-                isSubconto,        // заголовок субконто, по заданию не надо выводить, а суммировать только по счетам
-                korr: isKorrLine ? element.accName : "",   
-                level: isHeader ? element.acc.split(".").length-1 : 0,
-                subconto: isSubconto ? element.accName : "",
-                periodicData,
-
-            })
-          }         
+                  
       })
       console.log("РЕЗУЛЬТАТ ОБРАБОТКИ : ");      
-      console.log(result)
+      console.log(table3)
+    },
+    generateForm3: function() {
+      const data = this.raw_data
+      const periods = this.$store.state.periods  
+      this.mutate("formAnalysisAcc", FinomancerForms.form3New(data, periods, this.ОтмеченныеСчета))
+      console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc.length)
     }
 	}
 }

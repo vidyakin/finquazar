@@ -3,8 +3,8 @@
     <!-- Линия заголовка таблицы -->
     <div class="col-12">
       <h6>Анализ счета за {{ЗаголовокПериода}}</h6>
-    </div>    
-    <!-- <AnalysisTable :tableData="Результат"></AnalysisTable>   -->
+    </div>
+    <AnalysisTable />  
   </div>
 </template>
 

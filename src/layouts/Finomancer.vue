@@ -37,7 +37,8 @@
         
         <q-tab-panels v-model="tab">
           <q-tab-panel name="tabData" class="q-pa-none">
-            <DataPanel />   <!-- ПАНЕЛЬ ДАННЫХ -->
+            <TabAnalysis v-if="selectedForm == 'acc_an'" />  <!-- Панель для вывода анализа данных -->
+            <DataPanel v-else />   <!-- ПАНЕЛЬ ДАННЫХ -->            
           </q-tab-panel>
           <q-tab-panel name="tabSettings">
             <SettingsPanel/>    <!-- ПАНЕЛЬ НАСТРОЕК -->
@@ -76,12 +77,13 @@
 import LogoAndFirm from "../components/LogoAndFirm";
 import CommandPanel from "../components/CommandPanel";
 import DataPanel from "../components/Panels/DataPanel"
+import TabAnalysis from "../components/Panels/Tabs/TabAnalysis"
 import SettingsPanel from "../components/Panels/SettingsPanel"
 
 const { dialog } = require("electron").remote;
 
 export default {
-  components: { LogoAndFirm, CommandPanel, DataPanel, SettingsPanel },
+  components: { LogoAndFirm, CommandPanel, DataPanel, SettingsPanel, TabAnalysis },
   data() {
     return {
       densed: true,
@@ -90,12 +92,13 @@ export default {
       form_header: "", // заголовок формы
       rbs_data: [], // данные из файла Excel как есть
       
-      accTab: "",
-      
     };
   },
   computed: {
-    filename: function() { return this.$store.state.filename},
+    selectedForm() {
+			return this.$store.state.selectedForm
+		},
+    filename() { return this.$store.state.filename},
     tab: { 
       get() { return this.$store.state.tab},
       set(value) { this.$store.commit("set", {field: "tab", value}) }
@@ -104,8 +107,8 @@ export default {
       get() { return this.$store.state.message.show },
       set(value) { this.$store.commit(value == true ? "show_msg" : "hide_msg") }
     },
-    messageHeader: function() { return this.$store.state.message.header},
-    messageText: function() { return this.$store.state.message.text},
+    messageHeader() { return this.$store.state.message.header},
+    messageText() { return this.$store.state.message.text},
   },
   methods: {
     minimize () {

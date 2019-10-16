@@ -165,3 +165,74 @@ export function form3(Данные, Счет, Период = "") {
 
 	return {Результат, ЗаголовокФормы}
 }
+
+export function form3New(data, periods, accounts = []) {
+	let table3 = []
+	//this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
+	if (data == undefined) {
+		this.$store.commit("show_msg", {header: "Нет данных", text: "Не загружены данные из Excel"})
+		return 
+	}
+	let curr_acc = ""
+	data.forEach(element => {
+          
+		curr_acc = element.lType == "ОСВ_общая" ? element.acc : curr_acc   // для хранения последнего счета чтоб сравнивать когда метка типа Ан_90.01.1 а самого счета нет
+		let isHeader = element.lType == "ОСВ_общая"
+		let level = isHeader ? curr_acc.split(".").length -1 : 0
+		let isSubconto = element.lType == "ОСВ_"+curr_acc
+
+		// Когда субконто - ищем все строки с таким счетом и вытащим все корр.счета
+		if (isSubconto) {
+			// проверяем что строки для субконто еще нет в результирующем массиве
+			if (table3.find(l => l.acc == curr_acc && l.isSubconto ==true) != undefined ) return 
+
+			// Все корр счета для текущего счета
+			let korrs = new Set(data.filter(el=> el.lType == "Ан_"+curr_acc).map(el => el.accName))  // множество для исключения дублей
+			// пройдем по всем периодам и вытащим данные по каждому субконто
+			let period_data = []
+			periods.forEach(p => {      // - по периодам
+				let korr_sums = []
+				korrs.forEach(korr => {   // - по субконто
+                
+					let period_sum = data.filter(el=> el.lType == "Ан_"+curr_acc && el.accName == korr)  // ввыбираем из всех данных по субконто данные по периоду
+						.map(str => str.periodicAmounts.find(per=> per.p_id == p.p_id))   // для каждой строки отбираем только текущий период из всех колонок (0-й элемент т.к. фильтр)
+						.reduce((acc, p) =>     // суммируем если нашлось несколько строк для корр счета (массивов периодов тоже будет несколько)
+							({  
+								Dt: acc.Dt + p.Dt, Kt: acc.Kt + p.Kt
+							}), 
+						{     // начальный объект с суммами
+							Dt:0, Kt:0
+						})
+					korr_sums.push({
+						korr,
+						...period_sum
+					})
+                     
+				})
+				// 
+				period_data["p"+p.p_id] = korr_sums
+			})
+			// полученный свернутый объект пихаем в массив в разрезе счета
+			table3.push({     // 
+				acc: curr_acc,
+				rowN: element.rowN,
+				isHeader,
+				isSubconto,
+				period_data
+			})
+		}
+		else if (isHeader) {
+			// пихаем простые данные - когда строка это описание счета или субсчета
+			table3.push({
+				acc: curr_acc,
+				rowN: element.rowN,
+				isHeader,
+				isSubconto,
+				level,
+				periods: {}
+			})
+		}
+    
+	})
+	return table3
+}
