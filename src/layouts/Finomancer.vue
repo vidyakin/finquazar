@@ -1,52 +1,66 @@
 <template>
-  <div class="main">
-    <q-bar class="q-electron-drag bg-light-blue-12">
-      <div class="cursor-pointer">Помощь</div>
-      <q-space />
-      <q-btn dense flat icon="minimize"  @click="minimize" />
-      <!-- <q-btn dense flat icon="crop_square" /> -->
-      <q-btn dense flat icon="close" @click="closeApp" />
-    </q-bar> 
+  <!-- < class="q-pa-md"> -->
+  <q-layout view="lHh lpr lFf">
+    <q-header elevated>
+      <q-bar class="q-electron-drag bg-light-blue-12">
+        <div class="cursor-pointer">Помощь</div>
+        <q-space />
+        <q-btn dense flat icon="minimize"  @click="minimize" />
+        <!-- <q-btn dense flat icon="crop_square" /> -->
+        <q-btn dense flat icon="close" @click="closeApp" />
+      </q-bar>
+    </q-header>
     
-    <div class="q-pa-md">
-
-      <LogoAndFirm /> <!-- Панель шапки -->
-
-      <div class="row">
-        <div class="col filestring">
-          Файл с данными: <span class="filename">{{filename}}</span>
-        </div>
-      </div>
-      <div class="row" v-show="reportName.length">
-        <div class="col filestring">
-          Файл с отчетом: <span class="filename">{{reportName}}</span>
-        </div>
-      </div>
-
-      <CommandPanel />  <!-- Панель кнопок -->
-
-      <div class="hor_spacer"></div>
-
-      <!-- группа с табами  -->
-      <q-card flat>
-        <q-tabs v-model="tab" dense class="text-light-blue-9" active-color="primary" align="left" narrow-indicator>
-          <q-tab name="tabData" label="Данные" />
-          <q-tab name="tabSettings" label="Счета и периоды" />
-        </q-tabs>
-        <q-separator/>
-        
-        <q-tab-panels v-model="tab">
-          <q-tab-panel name="tabData" class="q-pa-none">
-            <TabAnalysis v-if="selectedForm == 'acc_an'" />  <!-- Панель для вывода анализа данных -->
-            <DataPanel v-else />   <!-- ПАНЕЛЬ ДАННЫХ -->            
-          </q-tab-panel>
-          <q-tab-panel name="tabSettings">
-            <SettingsPanel/>    <!-- ПАНЕЛЬ НАСТРОЕК -->
-          </q-tab-panel>
-        </q-tab-panels>
-      </q-card>
-    </div>
     
+    <q-page-container>
+      <q-page class="q-pa-md">
+
+          <LogoAndFirm /> <!-- Панель шапки -->
+
+          <div class="row">
+            <div class="col filestring">
+              Файл с данными: <span class="filename">{{filename}}</span>
+            </div>
+          </div>
+          <div class="row" v-show="reportName.length">
+            <div class="col filestring">
+              Файл с отчетом: <span class="filename">{{reportName}}</span>
+            </div>
+          </div>
+
+          <CommandPanel />  <!-- Панель кнопок -->
+
+          <div class="hor_spacer"></div>
+
+          <!-- группа с табами  -->
+          <q-card flat>
+            <q-tabs v-model="tab" dense class="text-light-blue-9" active-color="primary" align="left" narrow-indicator>
+              <q-tab name="tabData" label="Данные" />
+              <q-tab name="tabSettings" label="Счета и периоды" />
+            </q-tabs>
+            <q-separator/>
+            
+            <q-tab-panels v-model="tab">
+              <q-tab-panel name="tabData" class="q-pa-none">
+                <TabAnalysis v-if="selectedForm == 'acc_an'" />  <!-- Панель для вывода анализа данных -->
+                <DataPanel v-else />   <!-- ПАНЕЛЬ ДАННЫХ -->            
+              </q-tab-panel>
+              <q-tab-panel name="tabSettings">
+                <SettingsPanel/>    <!-- ПАНЕЛЬ НАСТРОЕК -->
+              </q-tab-panel>
+            </q-tab-panels>
+          </q-card>
+
+      </q-page>
+      <q-footer>
+        <q-bar dense class="bg-cyan-2 text-grey-10">
+        <div>Finomancer 1.6</div>
+        <!-- <q-icon name="email" /> -->
+        <q-space />
+        <div>{{new Date().toLocaleString()}}</div>
+      </q-bar>
+      </q-footer>
+    </q-page-container>
 <!--     
     <q-footer>
       <q-bar dense class="bg-black text-white">
@@ -69,7 +83,9 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
-  </div>
+  
+  </q-layout>
+  <!-- </div> -->
 </template>
 
 <script>
@@ -91,7 +107,7 @@ export default {
       
       form_header: "", // заголовок формы
       rbs_data: [], // данные из файла Excel как есть
-      
+      size: {width: 100, height: 100}
     };
   },
   computed: {
@@ -133,7 +149,13 @@ export default {
         this.valid.acc.valid = this.currForm == "osv_acc" && this.ОтмеченныеСчета.length != 0
       }
     },
-    
+    onResize (size) {
+      this.size = size
+      // {
+      //   width: 20 // width of container (in px)
+      //   height: 50 // height of container (in px)
+      // }
+    },
   }
 };
 </script>
@@ -165,6 +187,7 @@ h6 {
   /* margin: 15px; */
   max-width: 1600px;
   min-width: 960px;
+  background-color: rgb(245, 178, 178);
   /* font-family: "Open Sans Condensed Light", sans-serif; */
 }
 

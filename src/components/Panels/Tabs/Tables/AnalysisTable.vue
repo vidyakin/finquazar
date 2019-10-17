@@ -12,20 +12,52 @@
           </tr>
       </thead>
       <tbody>
-          <tr :class="get_class(row)" v-for="row of analysis_data" :key="row.rowN">
-              <template v-if="row.isHeader">
-                <td>{{row.acc}}</td>
-                <td>Начальное сальдо</td>
-                <td>{{row.rowN}}</td>
-                <td>{{row.level}} {{row.isSubconto}}</td>
+					<!-- :key="row.acc+row.p.p_id+row.korr" - для TR обязателен ключ -->
+            <template :class="get_class(row)" v-for="row of analysis_data" > 
+							<!-- для заголовка выводим строку со счетом -->
+            	<template  v-if="row.lType == 'header'">
+								<tr :key="'H-'+row.rowN" :class="get_class(row)">
+									<td>{{row.acc}}</td>
+									<td>Начальное сальдо</td>
+									<td></td>
+									<td></td>
+								</tr>
               </template>
-              <template v-else-if="row.isSubconto">
-                <td>Обороты за :</td>
-                <td>Начальное сальдо 2</td>
-                <td>{{row.rowN}}</td>
-                <td>{{row.level}} {{row.isSubconto}}</td>
-              </template>
-          </tr>
+							<!-- Для субконто надо вывести заголовок с названием периода и субмассив по периодам -->
+							<template v-if="row.lType == 'subconto' && row.p != '' && row.korr == '' && show_empty(row) ">
+								<tr :key="'B-'+row.rowN+row.p.p_id" :class="get_class(row)">
+									<td>Обороты за {{row.p.p_name}}</td>
+									<td>Начальное сальдо</td>
+									<td></td>
+									<td></td>								
+								</tr>
+							</template>
+							<!-- Для детальных строк по корр. счетам -->
+							<template v-if="row.lType == 'subconto' && row.korr != '' && show_empty(row)">
+								<tr :key="'K-'+row.rowN+row.p.p_id+row.korr" :class="get_class(row)" >
+									<td></td>
+									<td>{{row.korr}}</td>
+									<td class="nums">{{row.period_sum.Dt| fin_format }}</td>
+									<td class="nums">{{row.period_sum.Kt| fin_format }}</td>
+								</tr>
+							</template>
+							<!-- Для детальных строк по корр. счетам -->
+							<template v-if="row.lType == 'total' && show_empty(row)">
+								<tr :key="'T-'+row.rowN+row.p.p_id+'_1'" :class="get_class(row)">
+									<td></td>
+									<td>Оборот</td>
+									<td class="nums">{{row.period_sum.Dt| fin_format}}</td>
+									<td class="nums">{{row.period_sum.Kt| fin_format}}</td>								
+								</tr>
+								<tr :key="row.rowN+row.p.p_id+'_2'" :class="get_class(row)">
+									<td></td>
+									<td>Конечное сальдо {{row.rowN}}</td>
+									<td class="nums">{{row.period_sum.SaltoDt| fin_format}}</td>
+									<td class="nums">{{row.period_sum.SaldoKt| fin_format}}</td>								
+								</tr>
+							</template>							
+            </template>
+            
           <!-- Корр счет №1 -->
           <tr class="period_header">
               <td>Обороты за Январь 18</td>
@@ -56,7 +88,9 @@
 </template>
 
 <script>
+
 export default {
+		props: ["ПоказыватьПустыеОбороты"],
     data() {
         return {
             
@@ -65,21 +99,35 @@ export default {
     computed: {
         analysis_data() {
             return this.$store.state.formAnalysisAcc
-        },
-        
-    },
+        }
+		},
+		filters: {
+      fin_format: value => value == undefined ? '' : value.toLocaleString('ru', {style:'decimal', minimumFractionDigits: 2})
+    },    
     methods: {
         get_class(item) {
-            if (item.isHeader === true) {
+            if (item.lType == "header") {
                 if (item.level == 0) return "top_acc"
                 else if (item.level == 1) return "sub_acc"
                 else if (item.level == 2) return "sub_sub_acc"
             }
-            else if (item.isSubconto) return "period_header"
-        }
+						else if (item.lType == "subconto" && item.korr == '') 
+							return "period_header"
+						else if (item.lType == "subconto" && item.korr != '') 
+							return "korr_sum"
+						else if (item.lType == "total") 
+							return "korr_total"
+        },
+        show_empty(item) {
+					if (item.period_sum == undefined) {
+						console.log(item.acc,item.korr,item.p);
+						return true
+					}
+					return this.ПоказыватьПустыеОбороты || item.period_sum.Dt != 0 || item.period_sum.Kt != 0
+				}
     },
     created() {
-      console.log("Форма анализа создана");
+      console.log("Форма анализа создана, данные ");
       // this.ft = this.formType;
     }
 }
@@ -87,7 +135,7 @@ export default {
 
 <style>
 .tbl_an {
-  width: 960px;
+  width: 800px;
   table-layout: fixed;
   border-collapse: collapse;
   border: 1px solid grey;

@@ -1,10 +1,17 @@
 <template>
-  <div class="row">
+  <div class="row items-start">
     <!-- Линия заголовка таблицы -->
-    <div class="col-12">
-      <h6>Анализ счета за {{ЗаголовокПериода}}</h6>
+    <div class="col-shrink">
+      <h6>Анализ счета за {{ЗаголовокПериода}}</h6>      
     </div>
-    <AnalysisTable />  
+    <div style="width:200px"></div>
+    <div class="col-shrink q-py-sm">
+      <q-checkbox dense v-model="ПоказыватьПустыеОбороты" label="Показывать пустые обороты по корр. счетам"></q-checkbox>
+    </div>
+    <div class="col-12">
+      <AnalysisTable :ПоказыватьПустыеОбороты="ПоказыватьПустыеОбороты"/>  
+    </div>
+    
   </div>
 </template>
 
@@ -17,7 +24,8 @@ export default {
     data() {
         return {
           ЗаголовокПериода: "2019 год",
-          Результат: []
+          Результат: [],
+          ПоказыватьПустыеОбороты: true
         }
     }
 }

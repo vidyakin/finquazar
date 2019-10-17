@@ -18,7 +18,7 @@
 		<q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
 		<q-btn color="secondary" icon="save" label="Сохранить" @click="save" v-show="false"/>
     <q-btn color="secondary" icon="message" label="Сформировать и сохранить" @click="generate_and_save"/>
-    <q-btn label="form3 test" @click="generateForm3" v-show="true" />
+    <q-btn label="Анализ счета" @click="generateForm3" v-show="true" />
 	</div>
 </template>
 
@@ -246,7 +246,7 @@ export default {
       const data = this.raw_data
       const periods = this.$store.state.periods  
       this.mutate("formAnalysisAcc", FinomancerForms.form3New(data, periods, this.ОтмеченныеСчета))
-      console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc.length)
+      console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc)
     }
 	}
 }

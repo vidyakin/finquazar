@@ -8,6 +8,7 @@ export default new Vuex.Store({
 		count: 0, // Тестовый пример данных
 		appName: "Finomancer",
 		filename: "не выбран файл",
+		win_size: {},
 
 		tab: "tabData",
 		periodTab: "",

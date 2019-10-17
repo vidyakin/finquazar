@@ -189,9 +189,20 @@ export function form3New(data, periods, accounts = []) {
 			// Все корр счета для текущего счета
 			let korrs = new Set(data.filter(el=> el.lType == "Ан_"+curr_acc).map(el => el.accName))  // множество для исключения дублей
 			// пройдем по всем периодам и вытащим данные по каждому субконто
-			let period_data = []
+			// let period_data = []
 			periods.forEach(p => {      // - по периодам
-				let korr_sums = []
+				// eslint-disable-next-line no-unused-vars
+				let { p_id, ...periodTotal} = element.periodicAmounts.find(el=> el.p_id == p.p_id)	// итоги по периоду: вытаскиваем в periodTotal остальные поля кроме p_id
+				table3.push({     //  заголовок периода
+					acc: curr_acc,
+					rowN: element.rowN,	// может и не надо знать из какой строки экселя пришло?
+					lType: "subconto",
+					level:"",
+					p,
+					korr:"",
+					period_sum: { ...periodTotal}
+				})
+				// let korr_sums = []
 				korrs.forEach(korr => {   // - по субконто
                 
 					let period_sum = data.filter(el=> el.lType == "Ан_"+curr_acc && el.accName == korr)  // ввыбираем из всех данных по субконто данные по периоду
@@ -203,33 +214,54 @@ export function form3New(data, periods, accounts = []) {
 						{     // начальный объект с суммами
 							Dt:0, Kt:0
 						})
-					korr_sums.push({
+					// korr_sums.push({
+					// 	korr,
+					// 	...period_sum
+					// })
+					table3.push({     // 	отдельная строка для каждого сочетания период*коррсчет
+						acc: curr_acc,
+						rowN: element.rowN,
+						lType: "subconto",
+						level:"",
+						p,
 						korr,
-						...period_sum
+						period_sum
 					})
-                     
 				})
-				// 
-				period_data["p"+p.p_id] = korr_sums
+				
+				table3.push({     //  ИТОГ по периоду
+					acc: curr_acc,
+					rowN: element.rowN,
+					lType: "total",
+					level:"",
+					p,
+					korr:"",
+					period_sum: { ...periodTotal}
+				})
+				// period_data["p"+p.p_id] = korr_sums
 			})
+			// сюда надо итоговую строку по счету
+
+			// СТАРЫЙ СПОСОБ
 			// полученный свернутый объект пихаем в массив в разрезе счета
-			table3.push({     // 
-				acc: curr_acc,
-				rowN: element.rowN,
-				isHeader,
-				isSubconto,
-				period_data
-			})
+			// table3.push({     // 
+			// 	acc: curr_acc,
+			// 	rowN: element.rowN,
+			// 	isHeader,
+			// 	isSubconto,
+			// 	period_data
+			// })
 		}
 		else if (isHeader) {
 			// пихаем простые данные - когда строка это описание счета или субсчета
 			table3.push({
 				acc: curr_acc,
 				rowN: element.rowN,
-				isHeader,
-				isSubconto,
+				lType: "header",
 				level,
-				periods: {}
+				p:"",
+				korr:"",
+				period_sum: ""
 			})
 		}
     
