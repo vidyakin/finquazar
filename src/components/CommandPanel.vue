@@ -150,8 +150,8 @@ export default {
 
       if (this.selectedForm == "osv") {     // ПРОСТАЯ ОСВ - только по периодам 
         for (let fd of this.form_data) {
-          let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода} г.`
-          const saveResult = Excel.saveData(fd.Результат, `${folder}/Райффайзен ${fd.ЗаголовокПериода}.xlsx`, header)
+          let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода}`
+          const saveResult = Excel.saveData(fd.ДанныеЗаПериод.Результат, `${folder}/${inn} - ОСВ за ${fd.ЗаголовокПериода}.xlsx`, header)
         }
       }     
       else if (this.selectedForm == "osv_acc") {    // ОСВ ПО СЧЕТАМ - по периодам и счетам

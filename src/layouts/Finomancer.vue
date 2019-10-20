@@ -54,7 +54,7 @@
       </q-page>
       <q-footer>
         <q-bar dense class="bg-cyan-2 text-grey-10">
-        <div>Finomancer 1.6</div>
+        <div>Finomancer 1.7</div>
         <!-- <q-icon name="email" /> -->
         <q-space />
         <div>{{new Date().toLocaleString()}}</div>

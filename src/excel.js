@@ -106,8 +106,8 @@ export function saveData(data, path, header) {
 
 	// идентификаторы колонок должны совпадать с именами в объекте таблицы
 	sh.columns = [
-		{key: "acc", width: 10},
-		{key: "accName", width: 40},
+		{key: "acc", width: 60},
+		{key: "accName", width: 20},	// ИНН
 		{key: "DtStart", width: 20},
 		{key: "KtStart", width: 20},
 		{key: "Dt", width: 20},
@@ -120,8 +120,9 @@ export function saveData(data, path, header) {
 	// СТИЛЕВЫЕ ЭЛЕМЕНТЫ
 	const fontColor = {argb: "FF003F2F"}
 	const fonts = {
-		headLine: {name: "Arial", size: 10, color: fontColor},
+		headLine: {name: "Arial", size: 10, color: fontColor, bold: true},
 		line: {name: "Arial", size: 9},
+		line_acc: {name: "Arial", size: 10, bold: true},
 		totals: {name: "Arial", size: 10, color: fontColor, bold: true},
 		header: {name: "Arial", size: 12, bold: true}
 	}
@@ -152,8 +153,8 @@ export function saveData(data, path, header) {
 	head.font = fonts.header
 
 	let headRows = []
-	let h1 = sh.addRow(["Счет","Наименование", "Сальдо на начало периода", "",      "Обороты за период", "",      "Сальдо на конец периода",""])
-	let h2 = sh.addRow(["",    "",             "Дебет"                   , "Кредит","Дебет"            , "Кредит","Дебет"                 , "Кредит"    ])
+	let h1 = sh.addRow(["Счет","ИНН", "Начальное сальдо", "",      "Обороты", "",      "Конечное сальдо",""])
+	let h2 = sh.addRow(["",    "",         "Дт", "Кт",             "Дт", "Кт",            "Дт", "Кт"    ])
 	headRows.push(h1, h2)
 
 	headRows.forEach(r => {
@@ -186,13 +187,31 @@ export function saveData(data, path, header) {
 	// ==== MAIN DATA
 	//sh.addRows(tblDemo)
 	data.forEach(dataStr => {
-		let row = sh.addRow(dataStr)
+		// компонуем данные для строки в нужном виде
+		let prepared_row = [
+			dataStr.lType == "ОСВ_общая" ? dataStr.acc+", "+dataStr.accName : dataStr.accName,
+			dataStr.lType.slice(0,5) == "ОСВ_6" ? (dataStr.acc == 0 ? "" :dataStr.acc) : "",
+			dataStr.DtStart,
+			dataStr.KtStart,
+			dataStr.Dt,
+			dataStr.Kt,
+			dataStr.DtEnd,
+			dataStr.KtEnd,
+		]
+		// добавляем строку
+		let row = sh.addRow(prepared_row)
+
+		// для каждой ячейки применяем форматирование в зависимости от типа и колонки
 		row.eachCell({includeEmpty: true}, (cell, col)=>{
-			let level = dataStr.acc !== 0 && dataStr.acc.indexOf(".")!==-1 ? dataStr.acc.split(".").length : 0
+			//let level = dataStr.acc !== 0 && dataStr.acc.indexOf(".")!==-1 ? dataStr.acc.split(".").length : 0
+			let level = dataStr.lType == "ОСВ_общая" ? dataStr.acc.split(".").length : 3
 				
 			if (level == 1) {
 				cell.fill = fillLineRoot
 				cell.font = fonts.headLine
+			}
+			else if (dataStr.lType == "ОСВ_общая") {
+				cell.font = fonts.line_acc
 			}
 			else {
 				cell.font = fonts.line
