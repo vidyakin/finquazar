@@ -24,9 +24,17 @@ export default {
     data() {
         return {
           ЗаголовокПериода: "2019 год",
-          Результат: [],
-          ПоказыватьПустыеОбороты: true
+          Результат: [],        }
+    },
+    computed: {
+      ПоказыватьПустыеОбороты: {
+        get() {
+          return this.$store.state.show_blank_rows
+        },
+        set(value) {
+          this.$store.commit("set", {field: "show_blank_rows", value}) 
         }
+      }
     }
 }
 </script>

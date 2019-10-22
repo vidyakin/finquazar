@@ -7,7 +7,7 @@ export default new Vuex.Store({
 	state: {
 		count: 0, // Тестовый пример данных
 		appName: "Finomancer",
-		filename: "не выбран файл",
+		filename: "",
 		win_size: {},
 
 		tab: "tabData",
@@ -23,6 +23,7 @@ export default new Vuex.Store({
 		periods: [],	// Все периоды в файле
 
 		showAccounts: false, 		// Показывать счета или нет (зависит от формы)
+		show_blank_rows: true,		// Показывать пустые обороты 
 
 		// Валидность установленных настроек периода и счетов
 		valid: {

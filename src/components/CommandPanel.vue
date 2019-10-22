@@ -18,7 +18,7 @@
 		<q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
 		<q-btn color="secondary" icon="save" label="Сохранить" @click="save" v-show="false"/>
     <q-btn color="secondary" icon="message" label="Сформировать и сохранить" @click="generate_and_save"/>
-    <q-btn label="Анализ счета" @click="generateForm3" v-show="true" />
+    <q-btn label="Анализ счета" @click="generateForm3" v-show="false" />
 	</div>
 </template>
 
@@ -100,14 +100,18 @@ export default {
     },
     
 		generate(value) {
-      if (this.ОтмеченныеПериоды.length == 0) {
+      if (this.$store.state.filename == "") {
+        this.$store.commit("show_msg", {header: "Ошибка формирования", text: "Не загружен файл с исходными данными"})
+        return 
+      }
+      if (this.selectedForm != "acc_an" && this.ОтмеченныеПериоды.length == 0) {
         this.valid.period.valid = false
       }
       if (this.selectedForm == "osv_acc" && this.ОтмеченныеСчета.length == 0) {
         this.valid.acc.valid = false
       }
       if (this.НевалидныеНастройки() == true) {
-        this.$store.commit("show_message", {header: "Ошибка настроек", text: "Проверьте выбор периодов и счетов"})
+        this.$store.commit("show_msg", {header: "Ошибка настроек", text: "Проверьте выбор периодов и счетов"})
         return
       }
       
@@ -129,13 +133,15 @@ export default {
       }
       // Форма "Анализ по счету"
       else if (this.selectedForm == "acc_an") {
-          this.mutate("formAnalysisAcc", FinomancerForms.form3New(this.raw_data, this.ОтмеченныеСчета))
+        const periods = this.$store.state.periods
+        this.mutate("formAnalysisAcc", FinomancerForms.form3New(this.raw_data, periods, this.ОтмеченныеСчета))
       }
 
       console.log("Форма: %s, период: %s, Счет %s", this.selectedForm, this.currPeriod, this.currAcc);
     },
     
 		save: async function(event) {
+      if (this.form_data.length == 0) return
       let opt = {
         title: "Выберите папку для выгрузки файлов Excel",
         // filters: [{ name: "Excel файлы", extensions: ["xlsx"] }]
@@ -151,7 +157,7 @@ export default {
       if (this.selectedForm == "osv") {     // ПРОСТАЯ ОСВ - только по периодам 
         for (let fd of this.form_data) {
           let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода}`
-          const saveResult = Excel.saveData(fd.ДанныеЗаПериод.Результат, `${folder}/${inn} - ОСВ за ${fd.ЗаголовокПериода}.xlsx`, header)
+          const savedResult = Excel.saveData(fd.ДанныеЗаПериод.Результат, `${folder}/${inn} - ОСВ за ${fd.ЗаголовокПериода}.xlsx`, header)
         }
       }     
       else if (this.selectedForm == "osv_acc") {    // ОСВ ПО СЧЕТАМ - по периодам и счетам
@@ -159,9 +165,18 @@ export default {
           for (let acc_data of fd.ДанныеЗаПериод) {
             let acc = acc_data.Счет
             let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода} по счету ${acc}`
-            const saveResult = Excel.saveData(acc_data.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} - счет ${acc}.xlsx`, header)
+            const savedResult = Excel.saveData(acc_data.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} - счет ${acc}.xlsx`, header)
           }          
         }     
+      }
+      else if (this.selectedForm == "acc_an") {
+        let header = `Анализ счета`
+        let show_empty_lines = this.$store.state.show_blank_rows
+        const savedResult = Excel.saveAnalysisData(this.form_data, `${folder}/${inn} - анализ счета.xlsx`, header, show_empty_lines)
+      }
+      else {
+        this.$store.commit("show_msg", {header: "Ошибка", text: "Не выбран тип формы"})
+        return 
       }
       this.$store.commit("show_msg", {header: "Файлы сохранены", text: "Файлы успешно записаны"})
     },
@@ -243,10 +258,15 @@ export default {
       console.log(table3)
     },
     generateForm3: function() {
+      if (this.raw_data == undefined) {
+        this.$store.commit("show_msg", {header: "Ошибка формирования", text: "Не загружен файл с исходными данными"})
+        return
+      }
       const data = this.raw_data
       const periods = this.$store.state.periods  
       this.mutate("formAnalysisAcc", FinomancerForms.form3New(data, periods, this.ОтмеченныеСчета))
       console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc)
+      this.save()
     }
 	}
 }

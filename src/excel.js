@@ -3,6 +3,43 @@
 const XLSX = require("xlsx")
 const ExcelJS = require("exceljs")
 
+const fontColor = {argb: "FF003F2F"}
+const styles = {
+	fonts: {
+		headLine: {name: "Arial", size: 10, color: fontColor, bold: true},
+		line: {name: "Arial", size: 9},
+		line_acc: {name: "Arial", size: 10, bold: true},
+		totals: {name: "Arial", size: 10, color: fontColor, bold: true},
+		header: {name: "Arial", size: 12, bold: true}
+	},
+	border: {
+		top:  {style: "thin", color: {argb: "FFA0A0A0"}},
+		left: {style: "thin", color: {argb: "FFA0A0A0"}},
+		bottom: {style: "thin", color: {argb: "FFA0A0A0"}},
+		right: {style: "thin", color: {argb: "FFA0A0A0"}}
+	},
+	fillHeader: {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: {argb:"FFD6E5CB"}
+	},
+	fillTopAcc: {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: { argb: "ffe4f0dd"}
+	},
+	fillPeriodHeader: {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: {argb: "fff0f6ef"}
+	},
+	fillLineRoot: {
+		type: "pattern",
+		pattern: "solid",
+		fgColor: {argb:"FFE4F0DD"}
+	}
+}
+
 /**
  * Чтение данных из экселя
  * 
@@ -117,40 +154,12 @@ export function saveData(data, path, header) {
 	]
 	// данные для заполнения
 	
-	// СТИЛЕВЫЕ ЭЛЕМЕНТЫ
-	const fontColor = {argb: "FF003F2F"}
-	const fonts = {
-		headLine: {name: "Arial", size: 10, color: fontColor, bold: true},
-		line: {name: "Arial", size: 9},
-		line_acc: {name: "Arial", size: 10, bold: true},
-		totals: {name: "Arial", size: 10, color: fontColor, bold: true},
-		header: {name: "Arial", size: 12, bold: true}
-	}
-
-	let border = {
-		top:  {style: "thin", color: {argb: "FFA0A0A0"}},
-		left: {style: "thin", color: {argb: "FFA0A0A0"}},
-		bottom: {style: "thin", color: {argb: "FFA0A0A0"}},
-		right: {style: "thin", color: {argb: "FFA0A0A0"}}
-	}
-
-	let fillHeader = {
-		type: "pattern",
-		pattern: "solid",
-		fgColor: {argb:"FFD6E5CB"}
-	}
-	let fillLineRoot = {
-		type: "pattern",
-		pattern: "solid",
-		fgColor: {argb:"FFE4F0DD"}
-	}
-
 	// ШАПКА
 	sh.addRow([""])
 	let head = sh.addRow([header])
 	sh.addRow([""])
 
-	head.font = fonts.header
+	head.font = styles.fonts.header
 
 	let headRows = []
 	let h1 = sh.addRow(["Счет","ИНН", "Начальное сальдо", "",      "Обороты", "",      "Конечное сальдо",""])
@@ -159,9 +168,9 @@ export function saveData(data, path, header) {
 
 	headRows.forEach(r => {
 		r.eachCell({includeEmpty: true}, (cell, col)=>{
-			cell.fill = fillHeader
-			cell.border = border
-			cell.font = fonts.headLine
+			cell.fill = styles.fillHeader
+			cell.border = styles.border
+			cell.font = styles.fonts.headLine
 			cell.alignment = {horizontal: "center", vertical: "top"}
 			// if (col < 3) cell.alignment = {vertical: "top"}
 		})
@@ -207,16 +216,16 @@ export function saveData(data, path, header) {
 			let level = dataStr.lType == "ОСВ_общая" ? dataStr.acc.split(".").length : 3
 				
 			if (level == 1) {
-				cell.fill = fillLineRoot
-				cell.font = fonts.headLine
+				cell.fill = styles.fillLineRoot
+				cell.font = styles.fonts.headLine
 			}
 			else if (dataStr.lType == "ОСВ_общая") {
-				cell.font = fonts.line_acc
+				cell.font = styles.fonts.line_acc
 			}
 			else {
-				cell.font = fonts.line
+				cell.font = styles.fonts.line
 			}
-			cell.border = border
+			cell.border = styles.border
 			if (col == 1) cell.alignment = {indent: level-1 , vertical: "top"}
 			if (col == 2) cell.alignment = {wrapText: true }
 			if (col > 2)  {
@@ -234,9 +243,9 @@ export function saveData(data, path, header) {
 
 	let totalLine = sh.addRow(["Итого","",totals.DtStart, totals.KtStart, totals.Dt, totals.Kt, totals.DtEnd, totals.KtEnd])
 	totalLine.eachCell({includeEmpty: true}, (cell) => {
-		cell.fill = fillHeader
-		cell.font = fonts.totals
-		cell.border = border
+		cell.fill = styles.fillHeader
+		cell.font = styles.fonts.totals
+		cell.border = styles.border
 		cell.numFmt = "0.00"
 	})
 
@@ -293,4 +302,102 @@ export function readData_old(path) {
 	// .catch(err => {
 	// 	console.log("ОШИБКА ЧТЕНИЯ : " + err)
 	// })
+}
+
+export function saveAnalysisData(data, path, header, show_empty_lines) {
+	const wb = new ExcelJS.Workbook()
+	wb.creator = "Finomancer Lab"
+	const sh = wb.addWorksheet("Данные по ОСВ")
+
+	// идентификаторы колонок должны совпадать с именами в объекте таблицы
+	sh.columns = [
+		{key: "col1", width: 40},
+		{key: "col2", width: 30},	// ИНН
+		{key: "Dt", width: 25},
+		{key: "Kt", width: 25},
+	]
+
+	// Функция определения выводимости строки 
+	let show_empty = item => {
+		if (item.period_sum == undefined) {
+			console.log(item.acc, item.korr, item.p)
+			return true
+		}
+		return show_empty_lines || item.period_sum.Dt != 0 || item.period_sum.Kt != 0
+	}
+	
+	// ШАПКА
+	sh.addRow([""])
+	let head = sh.addRow([header])
+	sh.addRow([""])
+
+	head.font = styles.fonts.header
+
+	let headRows = []
+	let h1 = sh.addRow(["Счет",   "Корр. счет", "Дебет", "Кредит"])
+	let h2 = sh.addRow(["Период", "",           "",      ""])
+	headRows.push(h1, h2)
+	headRows.forEach(r => {
+		r.eachCell({includeEmpty: true}, (cell, col)=>{
+			cell.fill = styles.fillHeader
+			cell.border = styles.border
+			cell.font = styles.fonts.headLine
+			cell.alignment = {horizontal: "left", vertical: "top"}
+			// if (col < 3) cell.alignment = {vertical: "top"}
+		})
+	})
+	// в колонках вертикально объединяем ячейки:
+	sh.mergeCells("B4","B5")
+	sh.mergeCells("C4","C5")
+	sh.mergeCells("D4","D5")
+	
+
+	// ==== MAIN DATA
+	data.forEach(row => {
+		if (row.lType == "header") {
+			let r = sh.addRow([row.acc, "Начальное сальдо", "", ""])
+			r.eachCell({includeEmpty: true}, (c,coln) => {
+				c.fill = styles.fillTopAcc
+				c.border = styles.border
+			})
+		}
+		else if (row.lType == "subconto" && row.p != "" && row.korr == "" && show_empty(row) ) {
+			let r = sh.addRow([`Обороты за ${row.p.p_name}`, "Начальное сальдо", "", ""])
+			r.eachCell({includeEmpty: true}, (c,coln) => {
+				c.fill = styles.fillPeriodHeader
+				c.border = styles.border
+				if (coln <= 2) {
+					c.alignment = {indent: 2}
+				}
+			})
+		}
+		else if (row.lType == "subconto" && row.korr != "" && show_empty(row)) {
+			let r = sh.addRow(["", row.korr, row.period_sum.Dt, row.period_sum.Kt])
+			r.eachCell({includeEmpty: true}, (c,coln) => {
+				if (coln == 2) { c.alignment = {indent: 4} }
+				if (coln>2) { c.numFmt = "0.00" }
+			})
+		}
+		else if (row.lType == "total" && show_empty(row)) {
+			let r1 = sh.addRow(["", "Оборот", row.period_sum.Dt, row.period_sum.Kt])
+			let r2 = sh.addRow(["", "Конечное сальдо", row.period_sum.SaltoDt || 0, row.period_sum.SaltoKt || 0])
+			r1.eachCell({includeEmpty: true}, (c,coln) => {
+				c.fill = styles.fillTopAcc
+				c.border = styles.border
+				if (coln == 1) { c.alignment = {indent: 2} }
+				if (coln>2) { c.numFmt = "0.00" }
+			})
+			r2.eachCell({includeEmpty: true}, (c,coln) => {
+				c.fill = styles.fillTopAcc
+				c.border = styles.border
+				if (coln == 1) { c.alignment = {indent: 2} }
+				if (coln>2) { c.numFmt = "0.00" }
+			})
+		}
+	})
+
+	// Write file to disk
+	wb.xlsx.writeFile(path).then( result => {
+		console.log("Сохранение завершено",result)    
+	})
 }

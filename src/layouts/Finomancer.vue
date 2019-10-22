@@ -54,7 +54,7 @@
       </q-page>
       <q-footer>
         <q-bar dense class="bg-cyan-2 text-grey-10">
-        <div>Finomancer 1.7</div>
+        <div>Finomancer 1.9</div>
         <!-- <q-icon name="email" /> -->
         <q-space />
         <div>{{new Date().toLocaleString()}}</div>
@@ -114,7 +114,7 @@ export default {
     selectedForm() {
 			return this.$store.state.selectedForm
 		},
-    filename() { return this.$store.state.filename},
+    filename() { return this.$store.state.filename || "не выбран файл"},
     tab: { 
       get() { return this.$store.state.tab},
       set(value) { this.$store.commit("set", {field: "tab", value}) }
