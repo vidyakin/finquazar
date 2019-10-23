@@ -193,6 +193,10 @@ export function form3New(data, periods, accounts = []) {
 			periods.forEach(p => {      // - по периодам
 				// eslint-disable-next-line no-unused-vars
 				let { p_id, ...periodTotal} = element.periodicAmounts.find(el=> el.p_id == p.p_id)	// итоги по периоду: вытаскиваем в periodTotal остальные поля кроме p_id
+				let SaldoStart = p.p_num == 1 ? 
+					{DtStart: element.DtStart, KtStart: element.KtStart} : 
+					(el => ({DtStart: el.SaldoDt, KtStart: el.SaldoKt}))(element.periodicAmounts.find(el => el.p_num == p.p_num-1))
+				//let { StartSaldoDt, StartSaldoKt} = element.periodicAmounts.filter(el => el.p_num <= p.p_num).reduce((sum, el) => (sum.), {})
 				table3.push({     //  заголовок периода
 					acc: curr_acc,
 					rowN: element.rowN,	// может и не надо знать из какой строки экселя пришло?
@@ -200,7 +204,7 @@ export function form3New(data, periods, accounts = []) {
 					level:"",
 					p,
 					korr:"",
-					period_sum: { ...periodTotal}
+					period_sum: { ...periodTotal, ...SaldoStart}
 				})
 				// let korr_sums = []
 				korrs.forEach(korr => {   // - по субконто

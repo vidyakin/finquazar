@@ -92,8 +92,9 @@ export default {
       this.mutate("tab","tabSettings") 
       
       console.log("Данные загружены. Счета: ", this.$store.state.accs);
-      let an_string = JSON.stringify(loaded_data)
-      fs.writeFileSync("D:/Работа/Михаил Цалапов, БП/Excel/Форма 3, тест/raw_data.json", an_string)
+      console.log("Данные загружены. Периоды: ", this.$store.state.periods);
+      //let an_string = JSON.stringify(loaded_data)
+      //fs.writeFileSync("D:/Работа/Михаил Цалапов, БП/Excel/Форма 3, тест/raw_data.json", an_string)
       
       this.tableData = []
       this.formData = []
@@ -135,9 +136,10 @@ export default {
       else if (this.selectedForm == "acc_an") {
         const periods = this.$store.state.periods
         this.mutate("formAnalysisAcc", FinomancerForms.form3New(this.raw_data, periods, this.ОтмеченныеСчета))
+        console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc)
       }
 
-      console.log("Форма: %s, период: %s, Счет %s", this.selectedForm, this.currPeriod, this.currAcc);
+      //console.log("Форма: %s, период: %s, Счет %s", this.selectedForm, this.currPeriod, this.currAcc);
     },
     
 		save: async function(event) {

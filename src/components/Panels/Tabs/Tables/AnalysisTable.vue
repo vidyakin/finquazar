@@ -28,8 +28,8 @@
 							<tr :key="'B-'+row.rowN+row.p.p_id" :class="get_class(row)">
 								<td>Обороты за {{row.p.p_name}}</td>
 								<td>Начальное сальдо</td>
-								<td></td>
-								<td></td>								
+								<td class="nums">{{row.period_sum.DtStart| fin_format }}</td>
+								<td class="nums">{{row.period_sum.KtStart| fin_format }}</td>								
 							</tr>
 						</template>
 						<!-- Для детальных строк по корр. счетам -->
@@ -51,8 +51,8 @@
 							</tr>
 							<tr :key="row.rowN+row.p.p_id+'_2'" :class="get_class(row)">
 								<td></td>
-								<td>Конечное сальдо {{row.rowN}}</td>
-								<td class="nums">{{row.period_sum.SaltoDt| fin_format}}</td>
+								<td>Конечное сальдо</td>
+								<td class="nums">{{row.period_sum.SaldoDt| fin_format}}</td>
 								<td class="nums">{{row.period_sum.SaldoKt| fin_format}}</td>								
 							</tr>
 						</template>							

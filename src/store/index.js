@@ -100,7 +100,7 @@ export default new Vuex.Store({
 			state.rbs_data = excel_data	 
 			// Выдергиваем периоды
 			state.periods = []
-			excel_data.periods.map(p => state.periods.push({...p.period, chkd:false})) 
+			excel_data.periods.map(p => state.periods.push({p_num: p.p_num, ...p.period, chkd:false})) 
 			// Выдергиваем счета
 			state.accs = []
 			excel_data.data.forEach(d => { 

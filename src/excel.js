@@ -64,7 +64,7 @@ export function readData (path) {
 	}	
     
 	// заполняем периоды
-	let pCol = 5
+	let pCol = 5, n = 1
 	let cell, cell1
 	while (pCol < diap.e.c) {
 	
@@ -74,6 +74,7 @@ export function readData (path) {
 		if (cell1 !== "Все") { // последняя колонка
 			periods.push({
 				col: pCol,
+				p_num: n,
 				period: {
 					p_id: cell + "_" + cell1.replace("кв. ","").replace(/\(.+\) /g,""),
 					p_name: cell + " " + cell1
@@ -82,6 +83,7 @@ export function readData (path) {
 		// console.log(cell + " " + cell1)
 		} 
 		pCol += 5
+		n+=1
 	}
 
 	// очистка строки от пробелов если это строка 
@@ -105,6 +107,7 @@ export function readData (path) {
 		}
 		periods.forEach( p => {
 			let pAmount = {
+				p_num: p.p_num,
 				p_id: p.period.p_id,
 				Dt: conv(getVal(p.col+1, row)), // pCol - колонка где номер периода. Дебет - после нее
 				Kt: conv(getVal(p.col+2, row)),
