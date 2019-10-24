@@ -90,7 +90,7 @@
 <script>
 
 export default {
-		props: ["ПоказыватьПустыеОбороты"],
+		props: ["ПоказыватьПустыеОбороты", "Счет"],
 		data() {
 				return {
 						
@@ -98,7 +98,7 @@ export default {
 		},
 		computed: {
 				analysis_data() {
-						return this.$store.state.formAnalysisAcc
+						return this.$store.state.formAnalysisAcc.filter(e => e.acc.substr(0,2) == this.Счет)
 				}
 		},
 		filters: {

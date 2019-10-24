@@ -307,7 +307,7 @@ export function readData_old(path) {
 	// })
 }
 
-export function saveAnalysisData(data, path, header, show_empty_lines) {
+export function saveAnalysisData(data, path, acc, show_empty_lines) {
 	const wb = new ExcelJS.Workbook()
 	wb.creator = "Finomancer Lab"
 	const sh = wb.addWorksheet("Данные по ОСВ")
@@ -331,7 +331,7 @@ export function saveAnalysisData(data, path, header, show_empty_lines) {
 	
 	// ШАПКА
 	sh.addRow([""])
-	let head = sh.addRow([header])
+	let head = sh.addRow(["Анализ счета "+acc])
 	sh.addRow([""])
 
 	head.font = styles.fonts.header
@@ -356,48 +356,50 @@ export function saveAnalysisData(data, path, header, show_empty_lines) {
 	
 
 	// ==== MAIN DATA
-	data.forEach(row => {
-		if (row.lType == "header") {
-			let r = sh.addRow([row.acc, "Начальное сальдо", "", ""])
-			r.eachCell({includeEmpty: true}, (c,coln) => {
-				c.fill = styles.fillTopAcc
-				c.border = styles.border
-			})
-		}
-		else if (row.lType == "subconto" && row.p != "" && row.korr == "" && show_empty(row) ) {
-			let r = sh.addRow([`Обороты за ${row.p.p_name}`, "Начальное сальдо", "", ""])
-			r.eachCell({includeEmpty: true}, (c,coln) => {
-				c.fill = styles.fillPeriodHeader
-				c.border = styles.border
-				if (coln <= 2) {
-					c.alignment = {indent: 2}
-				}
-			})
-		}
-		else if (row.lType == "subconto" && row.korr != "" && show_empty(row)) {
-			let r = sh.addRow(["", row.korr, row.period_sum.Dt, row.period_sum.Kt])
-			r.eachCell({includeEmpty: true}, (c,coln) => {
-				if (coln == 2) { c.alignment = {indent: 4} }
-				if (coln>2) { c.numFmt = "0.00" }
-			})
-		}
-		else if (row.lType == "total" && show_empty(row)) {
-			let r1 = sh.addRow(["", "Оборот", row.period_sum.Dt, row.period_sum.Kt])
-			let r2 = sh.addRow(["", "Конечное сальдо", row.period_sum.SaltoDt || 0, row.period_sum.SaltoKt || 0])
-			r1.eachCell({includeEmpty: true}, (c,coln) => {
-				c.fill = styles.fillTopAcc
-				c.border = styles.border
-				if (coln == 1) { c.alignment = {indent: 2} }
-				if (coln>2) { c.numFmt = "0.00" }
-			})
-			r2.eachCell({includeEmpty: true}, (c,coln) => {
-				c.fill = styles.fillTopAcc
-				c.border = styles.border
-				if (coln == 1) { c.alignment = {indent: 2} }
-				if (coln>2) { c.numFmt = "0.00" }
-			})
-		}
-	})
+	data
+		.filter(e => e.acc.substr(0,2) == acc)
+		.forEach(row => {
+			if (row.lType == "header") {
+				let r = sh.addRow([row.acc, "Начальное сальдо", "", ""])
+				r.eachCell({includeEmpty: true}, (c,coln) => {
+					c.fill = styles.fillTopAcc
+					c.border = styles.border
+				})
+			}
+			else if (row.lType == "subconto" && row.p != "" && row.korr == "" && show_empty(row) ) {
+				let r = sh.addRow([`Обороты за ${row.p.p_name}`, "Начальное сальдо", row.period_sum.DtStart, row.period_sum.KtStart])
+				r.eachCell({includeEmpty: true}, (c,coln) => {
+					c.fill = styles.fillPeriodHeader
+					c.border = styles.border
+					if (coln <= 2) {
+						c.alignment = {indent: 2}
+					}
+				})
+			}
+			else if (row.lType == "subconto" && row.korr != "" && show_empty(row)) {
+				let r = sh.addRow(["", row.korr, row.period_sum.Dt, row.period_sum.Kt])
+				r.eachCell({includeEmpty: true}, (c,coln) => {
+					if (coln == 2) { c.alignment = {indent: 4} }
+					if (coln>2) { c.numFmt = "0.00" }
+				})
+			}
+			else if (row.lType == "total" && show_empty(row)) {
+				let r1 = sh.addRow(["", "Оборот", row.period_sum.Dt, row.period_sum.Kt])
+				let r2 = sh.addRow(["", "Конечное сальдо", row.period_sum.SaldoDt || 0, row.period_sum.SaldoKt || 0])
+				r1.eachCell({includeEmpty: true}, (c,coln) => {
+					c.fill = styles.fillTopAcc
+					c.border = styles.border
+					if (coln == 1) { c.alignment = {indent: 2} }
+					if (coln>2) { c.numFmt = "0.00" }
+				})
+				r2.eachCell({includeEmpty: true}, (c,coln) => {
+					c.fill = styles.fillTopAcc
+					c.border = styles.border
+					if (coln == 1) { c.alignment = {indent: 2} }
+					if (coln>2) { c.numFmt = "0.00" }
+				})
+			}
+		})
 
 	// Write file to disk
 	wb.xlsx.writeFile(path).then( result => {

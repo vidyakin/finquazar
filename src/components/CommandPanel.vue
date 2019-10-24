@@ -41,8 +41,9 @@ export default {
 		}
 	},
 	computed: {
-    ОтмеченныеПериоды: function() { return this.$store.getters.chkdPeriods }, 
-    ОтмеченныеСчета: function() { return  this.$store.getters.chkdAccounts },
+    ОтмеченныеПериоды() { return this.$store.getters.chkdPeriods }, 
+    ОтмеченныеСчета() { return  this.$store.getters.chkdAccounts },
+    Счета() { return this.$store.state.accs },
     
 		selectedForm: {
 			get() {
@@ -159,7 +160,7 @@ export default {
       if (this.selectedForm == "osv") {     // ПРОСТАЯ ОСВ - только по периодам 
         for (let fd of this.form_data) {
           let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода}`
-          const savedResult = Excel.saveData(fd.ДанныеЗаПериод.Результат, `${folder}/${inn} - ОСВ за ${fd.ЗаголовокПериода}.xlsx`, header)
+          const savedResult = Excel.saveData(fd.ДанныеЗаПериод.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} ОСВ.xlsx`, header)
         }
       }     
       else if (this.selectedForm == "osv_acc") {    // ОСВ ПО СЧЕТАМ - по периодам и счетам
@@ -167,14 +168,15 @@ export default {
           for (let acc_data of fd.ДанныеЗаПериод) {
             let acc = acc_data.Счет
             let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода} по счету ${acc}`
-            const savedResult = Excel.saveData(acc_data.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} - счет ${acc}.xlsx`, header)
+            const savedResult = Excel.saveData(acc_data.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} - ОСВ ${acc}.xlsx`, header)
           }          
         }     
       }
       else if (this.selectedForm == "acc_an") {
-        let header = `Анализ счета`
         let show_empty_lines = this.$store.state.show_blank_rows
-        const savedResult = Excel.saveAnalysisData(this.form_data, `${folder}/${inn} - анализ счета.xlsx`, header, show_empty_lines)
+        for (let Счет of this.Счета) {
+          const savedResult = Excel.saveAnalysisData(this.form_data, `${folder}/${inn} - анализ счета ${Счет.acc}.xlsx`, Счет.acc, show_empty_lines)
+        }
       }
       else {
         this.$store.commit("show_msg", {header: "Ошибка", text: "Не выбран тип формы"})
