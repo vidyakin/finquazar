@@ -1,7 +1,7 @@
 <template>
   <div class="row justify-start q-gutter-md"> 
 		<q-btn color="secondary" icon="attach_file" label="Загрузить файл"
-			@click="chooseFile"			
+			@click="chooseFile" :v-show="ЗагружатьФайлыОтдельно"			
 		/>        
 		<q-btn-toggle
 			v-model="selectedForm" 
@@ -17,7 +17,11 @@
 		<q-space/>
 		<q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
 		<q-btn color="secondary" icon="save" label="Сохранить" @click="save" v-show="false"/>
+    
     <q-btn color="secondary" icon="message" label="Сформировать и сохранить" @click="generate_and_save"/>
+
+    <q-btn color="secondary" icon="message" label="Данные ОСВ" @click="osv_all" v-show="false"/>
+    <q-btn color="secondary" icon="message" label="Анализ счетов" @click="analysis_all" v-show="false"/>
     <q-btn label="Анализ счета" @click="generateForm3" v-show="false" />
 	</div>
 </template>
@@ -28,6 +32,7 @@ const fs = require("fs");
 const { dialog } = require("electron").remote;
 const Excel = require('./../excel')
 const FinomancerForms = require("./../fin_logic")
+const Generation = require("../controllers/generation")
 
 export default {
 	data() {
@@ -44,6 +49,7 @@ export default {
     ОтмеченныеПериоды() { return this.$store.getters.chkdPeriods }, 
     ОтмеченныеСчета() { return  this.$store.getters.chkdAccounts },
     Счета() { return this.$store.state.accs },
+    ЗагружатьФайлыОтдельно() { return this.$store.state.appSettings.loadFileDifferently },
     
 		selectedForm: {
 			get() {
@@ -101,52 +107,7 @@ export default {
       this.formData = []
     },
     
-		generate(value) {
-      if (this.$store.state.filename == "") {
-        this.$store.commit("show_msg", {header: "Ошибка формирования", text: "Не загружен файл с исходными данными"})
-        return 
-      }
-      if (this.selectedForm != "acc_an" && this.ОтмеченныеПериоды.length == 0) {
-        this.valid.period.valid = false
-      }
-      if (this.selectedForm == "osv_acc" && this.ОтмеченныеСчета.length == 0) {
-        this.valid.acc.valid = false
-      }
-      if (this.НевалидныеНастройки() == true) {
-        this.$store.commit("show_msg", {header: "Ошибка настроек", text: "Проверьте выбор периодов и счетов"})
-        return
-      }
-      
-      this.mutate("tab", "tabData")    // переключаемся на закладку с данными
-      
-      // формируем данные
-      let form_data
-      // Форма "ОСВ общая"
-      if (this.selectedForm == "osv") {
-        this.mutate("formOSV", FinomancerForms.form1(this.raw_data, this.ОтмеченныеПериоды))
-        this.mutate("periodTab", "p_"+this.form_data[0].Период)
-      }      
-      // Форма "ОСВ по счету"
-      else if (this.selectedForm == "osv_acc") {
-          //form_data = FinomancerForms.form2(this.rbs_data.data, this.currAcc, this.currPeriod.p_id)
-          this.mutate("formOSVAcc", FinomancerForms.form2(this.raw_data, this.ОтмеченныеСчета, this.ОтмеченныеПериоды))
-          this.mutate("periodTab", "p_"+this.form_data[0].Период)
-          this.$store.state.selectedAcc = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
-      }
-      // Форма "Анализ по счету"
-      else if (this.selectedForm == "acc_an") {
-        const periods = this.$store.state.periods
-        const accs = this.$store.state.accs
-        
-        this.mutate("formAnalysisAcc", FinomancerForms.form3New(this.raw_data, periods, this.ОтмеченныеСчета))
-        this.$store.state.selectedAcc = "acc"+accs[0].acc
-        console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc)
-      }
-
-      //console.log("Форма: %s, период: %s, Счет %s", this.selectedForm, this.currPeriod, this.currAcc);
-    },
-    
-		save: async function(event) {
+    save: async function(event) {
       if (this.form_data.length == 0) return
       let opt = {
         title: "Выберите папку для выгрузки файлов Excel",
@@ -187,21 +148,78 @@ export default {
       }
       this.$store.commit("show_msg", {header: "Файлы сохранены", text: "Файлы успешно записаны"})
     },
-    generate_and_save: async function() {
-      this.generate()
-      await this.save()
+
+    /**
+     * ТОЛЬКО ФОРМИРОВАНИЕ формы
+     */
+		generate(value) {
+      Generation.generateCurrentForm(this.$store)
     },
+    
+		/** ОСНОВНАЯ ФУНКЦИЯ **
+     * Формирование и сохранение формы (любой)
+     */
+    generate_and_save: function() {
+      Generation.generateCurrentForm(this.$store)
+      this.save()
+    },
+
+    /** 
+     * Формирование формы анализа счетов (для тестирования по отдельной кнопке)
+     */
     generateForm3: function() {
-      if (this.raw_data == undefined) {
+      Generation.generateFormAnalysis(this.$store)
+      this.save()
+    },
+
+    /**
+     * Общее формирование обеих форм - полной ОСВ и по счетам
+     */
+    osv_all: function() {
+      if (this.$store.state.filename == "") {
         this.$store.commit("show_msg", {header: "Ошибка формирования", text: "Не загружен файл с исходными данными"})
+        return 
+      }
+      
+      if (this.НевалидныеНастройки() == true) {
+        this.$store.commit("show_msg", {header: "Ошибка настроек", text: "Проверьте выбор периодов и счетов"})
         return
       }
-      const data = this.raw_data
-      const periods = this.$store.state.periods  
-      this.mutate("formAnalysisAcc", FinomancerForms.form3New(data, periods, this.ОтмеченныеСчета))
-      console.log("Форма 3 сформирована", this.$store.state.formAnalysisAcc)
-      this.save()
-    }
+      // переключаемся на закладку с данными
+      this.mutate("tab", "tabData")    
+
+      // Общая ОСВ - генерация
+      this.mutate("formOSV", FinomancerForms.form1(this.raw_data, this.ОтмеченныеПериоды))
+      this.mutate("periodTab", "p_"+this.form_data[0].Период)
+      // + сохранение сразу
+      let form_data = this.$store.state.formOSV
+      for (let fd of form_data) {
+        let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода}`
+        const savedResult = Excel.saveData(fd.ДанныеЗаПериод.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} ОСВ.xlsx`, header)
+      }
+      // ОСВ по счету - генерация
+      this.mutate("formOSVAcc", FinomancerForms.form2(this.raw_data, this.ОтмеченныеСчета, this.ОтмеченныеПериоды))
+      this.mutate("periodTab", "p_"+this.form_data[0].Период)
+      this.$store.state.selectedAcc = "acc"+this.form_data[0].ДанныеЗаПериод[0].Счет
+      // + сохранение
+      form_data = this.$store.state.formOSVAcc
+      for (let fd of this.form_data) {
+        for (let acc_data of fd.ДанныеЗаПериод) {
+          let acc = acc_data.Счет
+          let header = `Оборотно сальдовая ведомость за ${fd.ЗаголовокПериода} по счету ${acc}`
+          const savedResult = Excel.saveData(acc_data.Результат, `${folder}/${inn} - ${fd.ЗаголовокПериода} - ОСВ ${acc}.xlsx`, header)
+        }          
+      }
+    },
+
+    /**
+     * Единое формирование и сохранение формы Анализ счета
+     */
+    analysis_all: function() {
+
+    },
+
+
 	}
 }
 </script>

@@ -10,6 +10,12 @@ export default new Vuex.Store({
 		filename: "",
 		win_size: {},
 
+		// настройки приложения, на будущее
+		appSettings: {
+			primaryColor: "#...",
+			loadFileDifferently: true
+		},
+
 		tab: "tabData",
 		periodTab: "",
 
@@ -59,6 +65,15 @@ export default new Vuex.Store({
 			return state[formNames[state.selectedForm]]
 		},
 		НевалидныеНастройки: state => {
+			let chkdP = state.periods.filter(el => el.chkd).map(el => el.p_id)
+			let chkdA = state.accs.filter(el => el.chkd).map(el => el.acc)
+
+			if (state.selectedForm != "acc_an" && chkdP.length == 0) {
+				state.valid.period.valid = false
+			}
+			if (state.selectedForm == "osv_acc" && chkdA.length == 0) {
+				state.valid.acc.valid = false
+			}
 			let isNotValid = false
 			for (let k in state.valid) isNotValid = isNotValid || !state.valid[k].valid 
 			return isNotValid
