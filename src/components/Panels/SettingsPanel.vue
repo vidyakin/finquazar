@@ -59,19 +59,19 @@
 export default {
 	data() {
 		return {
-			debug_info: true
+			debug_info: false
 		}
 	},
 	methods: {
 		getValid: function(f) { 
 			return this.$store.state.valid[f].valid 
 		},
-		getInvalidMsg: function(f) { 
-			return this.$store.state.valid[f].msg 
-		},
-		НевалидныеНастройки: function() {
-			this.$store.getters.НевалидныеНастройки
-		},
+    getInvalidMsg: function(f) { 
+      return this.$store.state.valid[f].msg 
+    },
+    НевалидныеНастройки: function() {
+      this.$store.getters.НевалидныеНастройки
+    },
     
 	},
 	computed: {
