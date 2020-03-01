@@ -1,22 +1,9 @@
 # Finomancer (finquazar)
 
-Finomancer App
+Finomancer App for *** bank to import info from companies' Excel file with accounting report (Form 1 & 2) 
+Bank can make a quick decision about credit score and loan availability for the company based on analysis of this data 
 
-## Install the dependencies
-```bash
-npm install
-```
-
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
-```bash
-quasar dev
-```
+Main screen with loaded data
+![main screen](/images/main.png)
 
 
-### Build the app for production
-```bash
-quasar build
-```
-
-### Customize the configuration
-See [Configuring quasar.conf.js](https://quasar.dev/quasar-cli/quasar-conf-js).
