@@ -3,6 +3,7 @@
 		<q-btn color="secondary" icon="attach_file" label="Загрузить файл"
 			@click="chooseFile"			
 		/>        
+    
 		<q-btn-toggle
 			v-model="selectedForm" 
 			:options="forms"
@@ -15,7 +16,8 @@
 			:dense="densed"  :options-dense="densed"
 		/> -->
 		<q-space/>
-		<q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
+		<q-btn round color="primary" icon="shopping_cart" @click="show_hide" v-show="false"	/>
+    <q-btn color="secondary" icon="create" label="Сформировать" @click="generate" v-show="false" />
 		<q-btn color="secondary" icon="save" label="Сохранить" @click="save" v-show="false"/>
     <q-btn color="secondary" icon="message" label="Сформировать и сохранить" @click="generate_and_save"/>
     <q-btn label="Анализ счета" @click="generateForm3" v-show="false" />
@@ -23,6 +25,7 @@
 </template>
 
 <script>
+import { Loading } from 'quasar';
 
 const fs = require("fs");
 const { dialog } = require("electron").remote;
@@ -72,7 +75,13 @@ export default {
     msg: function() {
       this.$store.commit("show_msg", {header: "Тест", text: "Тестовое сообщение"})
     },
-		/**
+    show_hide: async function() {
+      this.$q.loading.show({message: "Идет чтение исходного файла", delay: 100})
+      setTimeout(()=> {
+        this.$q.loading.hide()
+      }, 2000)
+    },
+    /**
 		 * Выбор файла с входными данными
 		 */
 		chooseFile: async function(event) {
@@ -80,18 +89,29 @@ export default {
         title: "Выберите файл Excel",
         filters: [{ name: "Excel файлы", extensions: ["xls", "xlsx"] }]
       };
+      this.$q.loading.show({message: "Идет чтение исходного файла", delay:100}) //  + СПИННЕР
       const dialogResult = await dialog.showOpenDialog(null, opt) //null, opt, fn => {
 			if (dialogResult == undefined) return
 
+      
 			let filename = dialogResult[0]
 
-			this.mutate('filename', filename);
-			const loaded_data = Excel.readData(filename)
-
-      this.$store.commit('load_data', loaded_data)
-			this.$store.commit('set_valid', 'all') 
+      this.mutate('filename', filename);
+      try {
+        
+        const loaded_data = Excel.readData(filename)
+        this.$store.commit('load_data', loaded_data)
+			
+      } catch (error) {
+        this.$q.loading.hide() //  - СПИННЕР 
+        console.log("Данные не загружены, произошла ошибка", error)
+        this.$store.commit("show_msg", {header: "Ошибка чтения данных", text: "Данные не загружены, произошла ошибка (" + error + ")", error: true})
+        return
+      }
+      this.$store.commit('set_valid', 'all') 
       this.mutate("tab","tabSettings") 
-      
+      this.$q.loading.hide() //  - СПИННЕР 
+
       console.log("Данные загружены. Счета: ", this.$store.state.accs);
       console.log("Данные загружены. Периоды: ", this.$store.state.periods);
       //let an_string = JSON.stringify(loaded_data)
@@ -188,8 +208,10 @@ export default {
       this.$store.commit("show_msg", {header: "Файлы сохранены", text: "Файлы успешно записаны"})
     },
     generate_and_save: async function() {
+      this.$q.loading.show({message: "Идет формирование файлов с результатами"})
       this.generate()
       await this.save()
+      this.$q.loading.hide()
     },
     generateForm3: function() {
       if (this.raw_data == undefined) {

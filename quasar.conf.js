@@ -34,6 +34,7 @@ module.exports = function (ctx) {
 				"QLayout",
 				"QHeader",
 				"QFooter",
+				"QAvatar",
 				//"QDrawer",
 				"QPageContainer",
 				"QPage",
@@ -49,7 +50,8 @@ module.exports = function (ctx) {
 				"QDialog",
 				"QCard", "QCardSection", "QCardActions","QTabs","QTab","QTabPanels","QTabPanel", "QSeparator","QSpace", "QBar",
 				"QScrollArea", "QResizeObserver", "QBadge",
-				"QCheckbox"
+				"QCheckbox",
+				"QSpinnerFacebook" 
 			],
 
 			directives: [
@@ -59,7 +61,8 @@ module.exports = function (ctx) {
 
 			// Quasar plugins
 			plugins: [
-				"Notify"
+				"Notify",
+				"Loading"
 			]
 		},
 

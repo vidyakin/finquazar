@@ -166,7 +166,7 @@ export function form3(Данные, Счет, Период = "") {
 	return {Результат, ЗаголовокФормы}
 }
 
-export function form3New(data, periods, accounts = []) {
+export function form3New(data, periods) {
 	let table3 = []
 	//this.mutate("formAnalysisAcc", FinomancerForms.form3(this.raw_data, this.currAcc, this.currPeriod.p_id))
 	if (data == undefined) {

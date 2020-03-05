@@ -76,7 +76,11 @@
         <q-card-section>
           <div class="text-h6">{{messageHeader}}</div>
         </q-card-section>        
-        <q-card-section v-html="messageText">
+        <!-- <q-card-section v-html="messageText">
+        </q-card-section> -->
+        <q-card-section>
+          <q-avatar :icon="messageError ? 'error_outline' : 'done'" :color="messageError ? 'red' : 'primary'" text-color="white" />
+          <span class="q-ml-sm"> {{messageText}}</span>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat label="OK" color="primary" v-close-popup />
@@ -125,6 +129,7 @@ export default {
     },
     messageHeader() { return this.$store.state.message.header},
     messageText() { return this.$store.state.message.text},
+    messageError() { return this.$store.state.message.error},
   },
   methods: {
     minimize () {

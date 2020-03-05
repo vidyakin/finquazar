@@ -39,7 +39,8 @@ export default new Vuex.Store({
 		message: {
 			show: false,
 			header: "Заголовок",
-			text: "Сообщение!"
+			text: "Сообщение!",
+			error: false
 		},
 		// Сгенерированные данные форм
 		formOSV: [],
@@ -86,10 +87,11 @@ export default new Vuex.Store({
 				state.showAccounts = true
 			}
 		},
-		show_msg(state, {header, text}) {
-			state.message.show = true
-			state.message.header = header
-			state.message.text = text
+		show_msg(state, msg_data) {
+			state.message = {...msg_data, show: true}
+			// state.message.show = true
+			// state.message.header = header
+			// state.message.text = text
 		},
 		hide_msg(state) {
 			state.message.show = false
