@@ -17,7 +17,7 @@
     "eslint-plugin-vue": "5.2.3",
     "exceljs": "2.0.0",
     "quasar": "1.1.6",
-    "xlsx": "0.15.1"
+    "xlsx": "0.17.0"
   },
   "devDependencies": {
     "@quasar/app": "1.1.3",
